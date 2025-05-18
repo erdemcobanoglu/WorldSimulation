@@ -1,37 +1,18 @@
-﻿
-using WorldSimulation.Application.Interfaces;
+﻿using WorldSimulation.Application.Interfaces;
+using WorldSimulation.Application.Service; 
 using WorldSimulation.Application.WorldMapService;
 using WorldSimulation.Domain.Entities;
 using WorldSimulation.Domain.Enums;
 
-
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
+// Harita oluştur
 IWorldMapService mapService = new WorldMapService();
-WorldMap map = mapService.CreateMap(30, 10); // 30x10 boyutunda bir harita
+WorldMap map = mapService.CreateMap(30, 10);
 
-PrintMap(map);
+// Hava ve simülasyon servisleri
+IWeatherService weatherService = new WeatherService();
+IWeatherSimulationEngine simulation = new WeatherSimulationEngine(weatherService);
 
-Console.WriteLine("\nSimülasyon tamamlandı. Çıkmak için bir tuşa basın...");
-Console.ReadKey();
-
-
-static void PrintMap(WorldMap map)
-{
-    for (int y = 0; y < map.Height; y++)
-    {
-        for (int x = 0; x < map.Width; x++)
-        {
-            Tile tile = map.Tiles[x, y];
-            string symbol = tile.Terrain switch
-            {
-                TerrainType.Land => "L",
-                TerrainType.Sea => "S",
-                TerrainType.Air => "A",
-                _ => "?"
-            };
-            Console.Write(symbol);
-        }
-        Console.WriteLine();
-    }
-}
+// Simülasyonu başlat
+simulation.Run(map);
