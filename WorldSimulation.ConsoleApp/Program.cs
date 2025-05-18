@@ -25,9 +25,9 @@ static void PrintMap(WorldMap map)
             Tile tile = map.Tiles[x, y];
             string symbol = tile.Terrain switch
             {
-                TerrainType.Land => "🟫",
-                TerrainType.Sea => "🌊",
-                TerrainType.Air => "☁",
+                TerrainType.Land => "L",
+                TerrainType.Sea => "S",
+                TerrainType.Air => "A",
                 _ => "?"
             };
             Console.Write(symbol);
