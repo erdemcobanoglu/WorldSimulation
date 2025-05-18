@@ -7,4 +7,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\WorldSimulation.Application\WorldSimulation.Application.csproj" />
+  </ItemGroup>
+
 </Project>
