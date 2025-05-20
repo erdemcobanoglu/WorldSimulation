@@ -25,35 +25,91 @@ namespace WorldSimulation.Application.Service
             _oceanEventService = oceanEventService;
         }
 
-        public void Run(WorldMap map, int maxTicks = 100)
+        public void Run(WorldMap map, int maxTicks)
         {
-            while (true)
+            int tick = 0;
+
+            while (tick < maxTicks)
             {
+                Console.Clear();
                 var currentTime = DateTime.Now;
 
-                // Hava durumu güncelle
+                // ☁️ Hava durumu güncelle
                 _weatherService.UpdateWeather(map, currentTime);
 
                 // 🌊 Okyanus olaylarını güncelle
-                _oceanEventService.Update(currentTime);
+                _oceanEventService?.Update(currentTime); // null kontrolü
 
-                // Olayları ekrana basmak istersen:
-                foreach (var evt in _oceanEventService.GetActiveEvents())
+                // Haritayı yazdır
+                PrintMap(map);
+
+                // Okyanus olaylarını listele
+                if (_oceanEventService != null)
                 {
-                    Console.WriteLine($"[🌊 {evt.EventType}] at ({evt.Location.X},{evt.Location.Y}) | Intensity: {evt.Intensity:F1}");
+                    foreach (var evt in _oceanEventService.GetActiveEvents())
+                    {
+                        Console.WriteLine($"[🌊 {evt.EventType}] at ({evt.Location.X},{evt.Location.Y}) | Intensity: {evt.Intensity:F1}");
+                    }
                 }
 
+                tick++;
                 Thread.Sleep(1000);
             }
         }
 
+
         private void PrintMap(WorldMap map)
         {
+            // 🟦 1. Katman: Hava durumu
+            Console.WriteLine("Atmosfer:");
             for (int y = 0; y < map.Height; y++)
             {
                 for (int x = 0; x < map.Width; x++)
                 {
                     Tile tile = map.Tiles[x, y];
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.Write(GetWeatherSymbol(tile.CurrentWeather));
+                }
+                Console.WriteLine();
+            }
+
+            // 🌊 2. Katman: Okyanus olayları (varsa göster, yoksa boşluk)
+            Console.WriteLine("\nOkyanus Olayları:");
+            for (int y = 0; y < map.Height; y++)
+            {
+                for (int x = 0; x < map.Width; x++)
+                {
+                    Tile tile = map.Tiles[x, y];
+
+                    if (tile.CurrentOceanEvent != null)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        Console.Write("🌊");
+                    }
+                    else
+                    {
+                        Console.Write(" ");
+                    }
+                }
+                Console.WriteLine();
+            }
+
+            // 🌍 3. Katman: Kara ve deniz
+            Console.WriteLine("\nYüzey:");
+            for (int y = 0; y < map.Height; y++)
+            {
+                for (int x = 0; x < map.Width; x++)
+                {
+                    Tile tile = map.Tiles[x, y];
+
+                    Console.ForegroundColor = tile.Terrain switch
+                    {
+                        TerrainType.Land => ConsoleColor.Green,
+                        TerrainType.Sea => ConsoleColor.Blue,
+                        TerrainType.Air => ConsoleColor.White,
+                        _ => ConsoleColor.Gray
+                    };
+
                     string symbol = tile.Terrain switch
                     {
                         TerrainType.Land => "L",
@@ -61,11 +117,15 @@ namespace WorldSimulation.Application.Service
                         TerrainType.Air => "A",
                         _ => "?"
                     };
+
                     Console.Write(symbol);
                 }
                 Console.WriteLine();
             }
+
+            Console.ResetColor();
         }
+
 
         private string GetWeatherSymbol(WeatherType weather)
         {

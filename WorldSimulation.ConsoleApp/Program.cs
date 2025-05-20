@@ -13,10 +13,12 @@ WorldMap map = mapService.CreateMap(30, 10);
 
 // Hava ve simülasyon servisleri
 IWeatherService weatherService = new WeatherService();
-IWeatherSimulationEngine simulation = new WeatherSimulationEngine(weatherService);
-
 // 🌊 Okyanus olayı servisi
 IOceanEventService oceanEventService = new OceanEventService(map);
+
+IWeatherSimulationEngine simulation = new WeatherSimulationEngine(weatherService, oceanEventService);
+
+
  
 
 

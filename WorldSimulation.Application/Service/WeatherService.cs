@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WorldSimulation.Application.Interfaces;
+using WorldSimulation.Domain.Entities;
 using WorldSimulation.Domain.Enums;
 
 namespace WorldSimulation.Application.Service
@@ -24,5 +25,22 @@ namespace WorldSimulation.Application.Service
                 _ => WeatherType.Snowy
             };
         }
+
+        public void UpdateWeather(WorldMap map, DateTime currentTime)
+        {
+            int tick = (int)(currentTime - DateTime.Today).TotalSeconds;
+
+            WeatherType currentWeather = GetCurrentWeather(tick);
+
+            // Haritadaki tüm tile'lara hava durumu uygula
+            for (int x = 0; x < map.Width; x++)
+            {
+                for (int y = 0; y < map.Height; y++)
+                {
+                    map.Tiles[x, y].CurrentWeather = currentWeather;
+                }
+            }
+        }
+
     }
 }

@@ -23,11 +23,22 @@ namespace WorldSimulation.Application.Service
 
         public void Update(DateTime currentTime)
         {
-            // Süresi dolmuş olayları kaldır
+            // Süresi dolmuş olayları bul
+            var expiredEvents = _activeEvents
+                .Where(ev => (currentTime - ev.StartTime).TotalMinutes > ev.Duration)
+                .ToList();
+
+            // Bu olayların Tile üzerindeki etkisini temizle
+            foreach (var expired in expiredEvents)
+            {
+                expired.Location.CurrentOceanEvent = null;
+            }
+
+            // Şimdi olay listesinden sil
             _activeEvents.RemoveAll(ev =>
                 (currentTime - ev.StartTime).TotalMinutes > ev.Duration);
 
-            // Etkileri uygula
+            // Etkileri uygula (hala aktif olanlar)
             foreach (var oceanEvent in _activeEvents)
             {
                 ApplyEventEffect(oceanEvent);
@@ -38,7 +49,7 @@ namespace WorldSimulation.Application.Service
             {
                 var newEvent = GenerateRandomOceanEvent(currentTime);
 
-                if (newEvent != null) // 👈 null kontrolü eklendi
+                if (newEvent != null)
                 {
                     _activeEvents.Add(newEvent);
                     ApplyEventEffect(newEvent);
@@ -100,6 +111,11 @@ namespace WorldSimulation.Application.Service
         {
             // Burada olayın çevresel etkilerini uygula
             // Örn: canlıları etkileyen bir metod çağırılabilir.
+
+            var tile = oceanEvent.Location;
+
+            // Mevcut etkisini yaz (mantıksal işaretleme)
+            tile.CurrentOceanEvent = oceanEvent.EventType;
         }
     }
 

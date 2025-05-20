@@ -10,5 +10,6 @@ namespace WorldSimulation.Application.Interfaces
     public interface IWeatherSimulationEngine
     {
         void Run(WorldMap map, int maxTicks = 100);
+
     }
 }

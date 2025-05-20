@@ -12,5 +12,6 @@ namespace WorldSimulation.Application.Interfaces
     {
         WeatherType GetCurrentWeather(int tick);
         void UpdateWeather(WorldMap map, DateTime currentTime);
+
     }
 }

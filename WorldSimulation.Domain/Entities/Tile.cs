@@ -11,8 +11,9 @@ namespace WorldSimulation.Domain.Entities
     {
         public int X { get; set; }
         public int Y { get; set; }
-        public TerrainType Terrain { get; set; }
-
+        public TerrainType Terrain { get; set; } 
+        public OceanEventType? CurrentOceanEvent { get; set; } = null;
+        public WeatherType CurrentWeather { get; set; } = WeatherType.Sunny;
 
 
         public Tile() { }
