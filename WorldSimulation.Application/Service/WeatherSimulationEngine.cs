@@ -57,73 +57,74 @@ namespace WorldSimulation.Application.Service
             }
         }
 
-
         private void PrintMap(WorldMap map)
         {
-            // 🟦 1. Katman: Hava durumu
-            Console.WriteLine("Atmosfer:");
-            for (int y = 0; y < map.Height; y++)
+            int y = 0; // sadece ilk satır çizilecek
+
+            // 🟦 Atmosfer
+            Console.Write("Atmosfer:  ");
+            for (int x = 0; x < map.Width; x++)
             {
-                for (int x = 0; x < map.Width; x++)
-                {
-                    Tile tile = map.Tiles[x, y];
-                    Console.ForegroundColor = ConsoleColor.White;
-                    Console.Write(GetWeatherSymbol(tile.CurrentWeather));
-                }
-                Console.WriteLine();
+                Tile tile = map.Tiles[x, y];
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.Write(GetWeatherSymbol(tile.CurrentWeather));
             }
+            Console.WriteLine();
 
-            // 🌊 2. Katman: Okyanus olayları (varsa göster, yoksa boşluk)
-            Console.WriteLine("\nOkyanus Olayları:");
-            for (int y = 0; y < map.Height; y++)
+            // 🌊 Okyanus
+            Console.Write("Okyanus:   ");
+            for (int x = 0; x < map.Width; x++)
             {
-                for (int x = 0; x < map.Width; x++)
-                {
-                    Tile tile = map.Tiles[x, y];
+                Tile tile = map.Tiles[x, y];
 
+                if (tile.Terrain == TerrainType.Sea)
+                {
                     if (tile.CurrentOceanEvent != null)
                     {
                         Console.ForegroundColor = ConsoleColor.Cyan;
-                        Console.Write("🌊");
+                        Console.Write("🌊"); // olay varsa göster
                     }
                     else
                     {
-                        Console.Write(" ");
+                        Console.ForegroundColor = ConsoleColor.Blue;
+                        Console.Write("~"); // deniz ama olay yoksa simge
                     }
                 }
-                Console.WriteLine();
-            }
-
-            // 🌍 3. Katman: Kara ve deniz
-            Console.WriteLine("\nYüzey:");
-            for (int y = 0; y < map.Height; y++)
-            {
-                for (int x = 0; x < map.Width; x++)
+                else
                 {
-                    Tile tile = map.Tiles[x, y];
-
-                    Console.ForegroundColor = tile.Terrain switch
-                    {
-                        TerrainType.Land => ConsoleColor.Green,
-                        TerrainType.Sea => ConsoleColor.Blue,
-                        TerrainType.Air => ConsoleColor.White,
-                        _ => ConsoleColor.Gray
-                    };
-
-                    string symbol = tile.Terrain switch
-                    {
-                        TerrainType.Land => "L",
-                        TerrainType.Sea => "S",
-                        TerrainType.Air => "A",
-                        _ => "?"
-                    };
-
-                    Console.Write(symbol);
+                    Console.Write(" "); // deniz değilse boşluk bırak
                 }
-                Console.WriteLine();
+            }
+            Console.WriteLine();
+
+
+            // 🌍 Yüzey
+            Console.Write("Yüzey:     ");
+            for (int x = 0; x < map.Width; x++)
+            {
+                Tile tile = map.Tiles[x, y];
+
+                Console.ForegroundColor = tile.Terrain switch
+                {
+                    TerrainType.Land => ConsoleColor.Green,
+                    TerrainType.Sea => ConsoleColor.Blue,
+                    TerrainType.Air => ConsoleColor.White,
+                    _ => ConsoleColor.Gray
+                };
+
+                string symbol = tile.Terrain switch
+                {
+                    TerrainType.Land => "L",
+                    TerrainType.Sea => "S",
+                    TerrainType.Air => "A",
+                    _ => "?"
+                };
+
+                Console.Write(symbol);
             }
 
             Console.ResetColor();
+            Console.WriteLine("\n");
         }
 
 
