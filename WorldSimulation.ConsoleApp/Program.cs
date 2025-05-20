@@ -16,7 +16,9 @@ IWeatherService weatherService = new WeatherService();
 IWeatherSimulationEngine simulation = new WeatherSimulationEngine(weatherService);
 
 // 🌊 Okyanus olayı servisi
-IOceanEventService oceanEventService = new OceanEventService();
+IOceanEventService oceanEventService = new OceanEventService(map);
+ 
+
 
 // Simülasyonu başlat
 simulation.Run(map);

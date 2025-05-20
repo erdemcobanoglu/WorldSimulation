@@ -14,6 +14,13 @@ namespace WorldSimulation.Application.Service
         private readonly List<OceanEvent> _activeEvents = new();
         private readonly Random _random = new();
 
+        private readonly WorldMap _map;
+
+        public OceanEventService(WorldMap map)
+        {
+            _map = map;
+        }
+
         public void Update(DateTime currentTime)
         {
             // Süresi dolmuş olayları kaldır
@@ -30,10 +37,15 @@ namespace WorldSimulation.Application.Service
             if (ShouldTriggerNewEvent())
             {
                 var newEvent = GenerateRandomOceanEvent(currentTime);
-                _activeEvents.Add(newEvent);
-                ApplyEventEffect(newEvent);
+
+                if (newEvent != null) // 👈 null kontrolü eklendi
+                {
+                    _activeEvents.Add(newEvent);
+                    ApplyEventEffect(newEvent);
+                }
             }
         }
+
 
         public IReadOnlyList<OceanEvent> GetActiveEvents()
         {
@@ -47,15 +59,37 @@ namespace WorldSimulation.Application.Service
 
         private OceanEvent GenerateRandomOceanEvent(DateTime currentTime)
         {
-            var eventType = (OceanEventType)_random.Next(0, Enum.GetNames(typeof(OceanEventType)).Length);
-            var location = new Tile(_random.Next(0, 100), _random.Next(0, 100));
+            // Water hücrelerini filtrele
+            var waterTiles = new List<Tile>();
+
+            for (int x = 0; x < _map.Width; x++)
+            {
+                for (int y = 0; y < _map.Height; y++)
+                {
+                    var tile = _map.Tiles[x, y];
+                    if (tile.Terrain == TerrainType.Sea)
+                    {
+                        waterTiles.Add(tile);
+                    }
+                }
+            }
+
+            if (waterTiles.Count == 0)
+            {
+                return null; // Okyanus olayı oluşturulamaz
+            }
+
+            // Rasgele bir water tile seç
+            var selectedTile = waterTiles[_random.Next(waterTiles.Count)];
+
+            var eventType = (OceanEventType)_random.Next(0, Enum.GetValues(typeof(OceanEventType)).Length);
             var duration = _random.Next(5, 15);
             var intensity = _random.NextDouble() * 10;
 
             return new OceanEvent
             {
                 EventType = eventType,
-                Location = location,
+                Location = selectedTile,
                 Duration = duration,
                 Intensity = intensity,
                 StartTime = currentTime

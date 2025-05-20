@@ -11,24 +11,39 @@ namespace WorldSimulation.Application.Service
 {
     public class WeatherSimulationEngine : IWeatherSimulationEngine
     {
-        private readonly IWeatherService _weatherService;
-
+        private readonly IWeatherService _weatherService; 
+        private readonly IOceanEventService _oceanEventService;
+         
         public WeatherSimulationEngine(IWeatherService weatherService)
         {
             _weatherService = weatherService;
         }
+         
+        public WeatherSimulationEngine(IWeatherService weatherService, IOceanEventService oceanEventService)
+        {
+            _weatherService = weatherService;
+            _oceanEventService = oceanEventService;
+        }
 
         public void Run(WorldMap map, int maxTicks = 100)
         {
-            for (int tick = 0; tick < maxTicks; tick++)
+            while (true)
             {
-                Console.Clear();
-                WeatherType weather = _weatherService.GetCurrentWeather(tick);
+                var currentTime = DateTime.Now;
 
-                Console.WriteLine($"Tick: {tick} | Weather: {GetWeatherSymbol(weather)} {weather}");
-                PrintMap(map);
+                // Hava durumu güncelle
+                _weatherService.UpdateWeather(map, currentTime);
 
-                Thread.Sleep(500);
+                // 🌊 Okyanus olaylarını güncelle
+                _oceanEventService.Update(currentTime);
+
+                // Olayları ekrana basmak istersen:
+                foreach (var evt in _oceanEventService.GetActiveEvents())
+                {
+                    Console.WriteLine($"[🌊 {evt.EventType}] at ({evt.Location.X},{evt.Location.Y}) | Intensity: {evt.Intensity:F1}");
+                }
+
+                Thread.Sleep(1000);
             }
         }
 
