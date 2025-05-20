@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace WorldSimulation.Domain.Enums
 {
-    public enum TerrainType
+    public enum OceanEventType
     {
-        Land,
-        Sea,
-        Air,
-        Unknown
+        Tide,
+        OceanStorm,
+        Current,
+        Tsunami
     }
 }

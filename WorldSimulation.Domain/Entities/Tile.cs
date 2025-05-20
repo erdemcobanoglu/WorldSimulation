@@ -12,5 +12,16 @@ namespace WorldSimulation.Domain.Entities
         public int X { get; set; }
         public int Y { get; set; }
         public TerrainType Terrain { get; set; }
+
+
+
+        public Tile() { }
+        public Tile(int x, int y)
+        {
+            X = x;
+            Y = y;
+            Terrain = TerrainType.Unknown; // veya varsayılan neyse
+        }
+
     }
 }
