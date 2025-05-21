@@ -2,7 +2,9 @@
 using WorldSimulation.Application.Service; 
 using WorldSimulation.Application.WorldMapService;
 using WorldSimulation.Domain.Entities;
-using WorldSimulation.Domain.Enums; 
+using WorldSimulation.Domain.Enums;
+using Microsoft.AspNetCore.SpaServices.Extensions;
+
 
 
 Console.OutputEncoding = System.Text.Encoding.UTF8;
