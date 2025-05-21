@@ -3,9 +3,12 @@ using WorldSimulation.Application.Interfaces;
 
 namespace WorldSumulation.Web.Controllers
 {
+    [ApiController]
+    [Route("api/[controller]")]
     public class MapController : ControllerBase
     {
         private readonly IWorldMapService _mapService;
+
 
         public MapController(IWorldMapService mapService)
         {
@@ -16,7 +19,7 @@ namespace WorldSumulation.Web.Controllers
         public IActionResult Generate()
         {
             var map = _mapService.CreateMap(30, 10);
-            return Ok(map); // JSON olarak döner
+            return Ok(map); // JSON döner
         }
     }
 }

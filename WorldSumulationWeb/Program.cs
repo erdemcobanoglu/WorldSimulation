@@ -1,15 +1,22 @@
 ﻿using Microsoft.AspNetCore.SpaServices.Extensions;
+using WorldSimulation.Application.Interfaces;
+using WorldSimulation.Application.WorldMapService;
+using WorldSimulation.Domain.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+//🌍 WorldMap servislerini burada tanımla
+builder.Services.AddScoped<IWorldMapService, WorldMapService>();
+
 // React uygulamasının build çıktısı
 builder.Services.AddSpaStaticFiles(configuration =>
 {
     configuration.RootPath = "ClientApp/build";
 });
+ 
 
 var app = builder.Build();
 
@@ -33,6 +40,7 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
 
 // React ile entegre: geliştirme sunucusuna yönlendir
 app.UseSpa(spa =>
