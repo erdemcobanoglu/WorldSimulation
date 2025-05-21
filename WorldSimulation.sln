@@ -3,21 +3,20 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldSimulation.Domain", "WorldSimulation.Domain\WorldSimulation.Domain.csproj", "{A4F13FB2-7AC3-4BDF-896A-6941209947E3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorldSimulation.Domain", "WorldSimulation.Domain\WorldSimulation.Domain.csproj", "{A4F13FB2-7AC3-4BDF-896A-6941209947E3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldSimulation.Application", "WorldSimulation.Application\WorldSimulation.Application.csproj", "{2BBD88CA-272F-4357-AB0C-AA8FF3830392}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorldSimulation.Application", "WorldSimulation.Application\WorldSimulation.Application.csproj", "{2BBD88CA-272F-4357-AB0C-AA8FF3830392}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldSimulation.Infrastructure", "WorldSimulation.Infrastructure\WorldSimulation.Infrastructure.csproj", "{B487493A-8EBC-4978-B249-C38CBBF920B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorldSimulation.Infrastructure", "WorldSimulation.Infrastructure\WorldSimulation.Infrastructure.csproj", "{B487493A-8EBC-4978-B249-C38CBBF920B7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldSimulation.ConsoleApp", "WorldSimulation.ConsoleApp\WorldSimulation.ConsoleApp.csproj", "{1694DCC3-C6BD-4422-8AAA-1DE7D0AAE1B2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorldSimulation.ConsoleApp", "WorldSimulation.ConsoleApp\WorldSimulation.ConsoleApp.csproj", "{1694DCC3-C6BD-4422-8AAA-1DE7D0AAE1B2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldSumulation.Web", "WorldSumulationWeb\WorldSumulation.Web.csproj", "{A66F20B2-33BA-4544-94F9-ED966416F024}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{A4F13FB2-7AC3-4BDF-896A-6941209947E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -36,5 +35,15 @@ Global
 		{1694DCC3-C6BD-4422-8AAA-1DE7D0AAE1B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1694DCC3-C6BD-4422-8AAA-1DE7D0AAE1B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1694DCC3-C6BD-4422-8AAA-1DE7D0AAE1B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A66F20B2-33BA-4544-94F9-ED966416F024}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A66F20B2-33BA-4544-94F9-ED966416F024}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A66F20B2-33BA-4544-94F9-ED966416F024}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A66F20B2-33BA-4544-94F9-ED966416F024}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BB066642-CF06-4255-ABC9-043764BA22E6}
 	EndGlobalSection
 EndGlobal

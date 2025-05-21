@@ -38,24 +38,35 @@ namespace WorldSimulation.Application.Service
                 _weatherService.UpdateWeather(map, currentTime);
 
                 // 🌊 Okyanus olaylarını güncelle
-                _oceanEventService?.Update(currentTime); // null kontrolü
+                _oceanEventService?.Update(currentTime);
 
-                // Haritayı yazdır
+                // 🖨 Haritayı yazdır
                 PrintMap(map);
 
-                // Okyanus olaylarını listele
+                // 🎯 Okyanus olaylarını tek satırda yaz
                 if (_oceanEventService != null)
                 {
-                    foreach (var evt in _oceanEventService.GetActiveEvents())
+                    // Konumu ayarla (örneğin en alt satıra yakın bir yere)
+                    int line = Console.CursorTop;
+                    Console.SetCursorPosition(0, line);
+
+                    var activeEvents = _oceanEventService.GetActiveEvents();
+
+                    string lineText = "Olaylar: ";
+                    foreach (var evt in activeEvents)
                     {
-                        Console.WriteLine($"[🌊 {evt.EventType}] at ({evt.Location.X},{evt.Location.Y}) | Intensity: {evt.Intensity:F1}");
+                        lineText += $"[{evt.EventType} @({evt.Location.X},{evt.Location.Y}) I:{evt.Intensity:F1}] ";
                     }
+
+                    // Satırı temizle (görsel çakışmayı önlemek için)
+                    Console.Write(lineText.PadRight(Console.WindowWidth));
                 }
 
                 tick++;
                 Thread.Sleep(1000);
             }
         }
+
 
         private void PrintMap(WorldMap map)
         {
