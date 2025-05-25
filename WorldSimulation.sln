@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorldSimulation.Infrastruct
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorldSimulation.ConsoleApp", "WorldSimulation.ConsoleApp\WorldSimulation.ConsoleApp.csproj", "{1694DCC3-C6BD-4422-8AAA-1DE7D0AAE1B2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldSumulation.Web", "WorldSumulationWeb\WorldSumulation.Web.csproj", "{A66F20B2-33BA-4544-94F9-ED966416F024}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldSimulation.Web", "WorldSimulation.Web\WorldSimulation.Web.csproj", "{152D678F-87BD-410A-8BA0-CB0EEBA951D6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +35,10 @@ Global
 		{1694DCC3-C6BD-4422-8AAA-1DE7D0AAE1B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1694DCC3-C6BD-4422-8AAA-1DE7D0AAE1B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1694DCC3-C6BD-4422-8AAA-1DE7D0AAE1B2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A66F20B2-33BA-4544-94F9-ED966416F024}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A66F20B2-33BA-4544-94F9-ED966416F024}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A66F20B2-33BA-4544-94F9-ED966416F024}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A66F20B2-33BA-4544-94F9-ED966416F024}.Release|Any CPU.Build.0 = Release|Any CPU
+		{152D678F-87BD-410A-8BA0-CB0EEBA951D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{152D678F-87BD-410A-8BA0-CB0EEBA951D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{152D678F-87BD-410A-8BA0-CB0EEBA951D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{152D678F-87BD-410A-8BA0-CB0EEBA951D6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
