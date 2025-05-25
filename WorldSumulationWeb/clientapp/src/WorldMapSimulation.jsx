@@ -6,10 +6,14 @@ function WorldMapSimulation() {
 
     useEffect(() => {
         fetch("/api/map/generate")
-            .then((res) => res.json())
+            .then((res) => {
+                if (!res.ok) throw new Error("Sunucu hatası");
+                return res.json();
+            })
             .then((data) => setMapData(data))
             .catch((err) => console.error("Hata:", err));
     }, []);
+
 
     if (!mapData) return <div>Harita yükleniyor...</div>;
 

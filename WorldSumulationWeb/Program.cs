@@ -7,20 +7,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddControllers(); // ✅ API Controller'lar için gerekli
 
-//🌍 WorldMap servislerini burada tanımla
 builder.Services.AddScoped<IWorldMapService, WorldMapService>();
 
-// React uygulamasının build çıktısı
 builder.Services.AddSpaStaticFiles(configuration =>
 {
     configuration.RootPath = "ClientApp/build";
 });
- 
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Middleware
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -29,8 +27,6 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
-// React build çıktısı statik olarak servis edilecek
 app.UseSpaStaticFiles();
 
 app.UseRouting();
@@ -41,8 +37,9 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+// ✅ API controller'ları aktif et
+app.MapControllers();
 
-// React ile entegre: geliştirme sunucusuna yönlendir
 app.UseSpa(spa =>
 {
     spa.Options.SourcePath = "ClientApp";
