@@ -20,6 +20,7 @@ namespace WorldSimulation.Controllers
             _weatherService = weatherService;
         }
 
+        // https://localhost:7260/api/map/generate
         [HttpGet("generate")]
         public IActionResult Generate()
         {
@@ -31,7 +32,40 @@ namespace WorldSimulation.Controllers
 
             simulation.Run(map,100);
 
-            return Ok(map);
+            return Ok(map);  
+        }
+
+        // https://localhost:7260/api/map/generatev2
+        [HttpGet("generatev2")]
+        public IActionResult Generatev2()
+        { 
+
+            // Örnek rastgele veri üretimi
+            var random = new Random();
+
+            var data = new
+            {
+                id = Guid.NewGuid(),
+                timestamp = DateTime.UtcNow,
+                temperature = random.Next(-20, 40), // -20°C ile 40°C arası  
+                weather = GetRandomWeather(),
+                city = GetRandomCity()
+            };
+
+            return Ok(data);
+        }
+
+        // Yardımcı metodlar
+        private string GetRandomWeather()
+        {
+            string[] conditions = { "Güneşli", "Yağmurlu", "Bulutlu", "Fırtınalı", "Karl", "Sisli" };
+            return conditions[new Random().Next(conditions.Length)];
+        }
+
+        private string GetRandomCity()
+        {
+            string[] cities = { "İstanbul", "Ankara", "İzmir", "Bursa", "Antalya", "Trabzon" };
+            return cities[new Random().Next(cities.Length)];
         }
     }
 

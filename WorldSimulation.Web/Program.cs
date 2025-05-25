@@ -6,11 +6,19 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-
-// ✅ Dependency Injection yapılandırması
 builder.Services.AddScoped<IWorldMapService, WorldMapService>();
 builder.Services.AddScoped<IWeatherService, WeatherService>();
-// Not: IOceanEventService ve IWeatherSimulationEngine, runtime parametreye ihtiyaç duyduğu için burada değil
+
+// ✅ CORS yapılandırması
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("http://localhost:3000") // React dev sunucusu
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 
@@ -25,6 +33,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+
+// ✅ CORS middleware aktif ediliyor
+app.UseCors();
 
 app.UseAuthorization();
 
