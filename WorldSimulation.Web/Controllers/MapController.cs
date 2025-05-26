@@ -20,6 +20,16 @@ namespace WorldSimulation.Controllers
             _weatherService = weatherService;
         }
 
+        [HttpGet("simulate")]
+        public IActionResult Simulate()
+        {
+            var map = _mapService.CreateMap(10, 5);
+            var simulationEngine = new SimulationEngine(_weatherService);
+            var result = simulationEngine.Run(map, 10);
+
+            return Ok(result); // 👈 JSON list
+        }
+
         // https://localhost:7260/api/map/generate
         [HttpGet("generate")]
         public IActionResult Generate()

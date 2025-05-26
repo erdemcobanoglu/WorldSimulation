@@ -9,6 +9,6 @@ namespace WorldSimulation.Application.Interfaces
 {
     public interface ISimulationEngine
     {
-        void Run(WorldMap map, int maxTicks = 100);
+        List<SimulationTickResult> Run(WorldMap map, int maxTicks = 100);
     }
 }

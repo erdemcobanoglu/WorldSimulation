@@ -18,19 +18,54 @@ namespace WorldSimulation.Application.Service
             _weatherService = weatherService;
         }
 
-        public void Run(WorldMap map, int maxTicks = 100)
+        public List<SimulationTickResult> Run(WorldMap map, int maxTicks = 100)
         {
+            var results = new List<SimulationTickResult>();
+
             for (int tick = 0; tick < maxTicks; tick++)
             {
-                Console.Clear();
                 WeatherType weather = _weatherService.GetCurrentWeather(tick);
 
-                Console.WriteLine($"Tick: {tick} | Hava Durumu: {GetWeatherSymbol(weather)} {weather}");
-                PrintMap(map);
+                var tickResult = new SimulationTickResult
+                {
+                    Tick = tick,
+                    Weather = weather.ToString(),
+                    WeatherSymbol = GetWeatherSymbol(weather),
+                    MapLines = RenderMap(map)
+                };
 
-                Thread.Sleep(500);
+                results.Add(tickResult);
             }
+
+            return results;
         }
+
+        private List<string> RenderMap(WorldMap map)
+        {
+            var lines = new List<string>();
+
+            for (int y = 0; y < map.Height; y++)
+            {
+                var line = new StringBuilder();
+
+                for (int x = 0; x < map.Width; x++)
+                {
+                    Tile tile = map.Tiles[x, y];
+                    string symbol = tile.Terrain switch
+                    {
+                        TerrainType.Land => "🟫",
+                        TerrainType.Sea => "🌊",
+                        TerrainType.Air => "☁️",
+                        _ => "?"
+                    };
+                    line.Append(symbol);
+                }
+
+                lines.Add(line.ToString());
+            }
+
+            return lines;
+        } 
 
         private void PrintMap(WorldMap map)
         {
