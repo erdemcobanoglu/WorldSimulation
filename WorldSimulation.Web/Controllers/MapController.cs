@@ -13,11 +13,16 @@ namespace WorldSimulation.Controllers
     {
         private readonly IWorldMapService _mapService;
         private readonly IWeatherService _weatherService;
+        private readonly IMapProvider _mapProvider;
 
-        public MapController(IWorldMapService mapService, IWeatherService weatherService)
+
+        public MapController( IWorldMapService mapService,
+                              IWeatherService weatherService,
+                              IMapProvider mapProvider)
         {
             _mapService = mapService;
             _weatherService = weatherService;
+            _mapProvider = mapProvider;
         }
 
         [HttpGet("simulate")]
@@ -40,15 +45,15 @@ namespace WorldSimulation.Controllers
             var oceanEventService = new OceanEventService(map);
             var simulation = new WeatherSimulationEngine(_weatherService, oceanEventService);
 
-            simulation.Run(map,100);
+            simulation.Run(map, 100);
 
-            return Ok(map);  
+            return Ok(map);
         }
 
         // https://localhost:7260/api/map/generatev2
         [HttpGet("generatev2")]
         public IActionResult Generatev2()
-        { 
+        {
 
             // Örnek rastgele veri üretimi
             var random = new Random();
@@ -64,8 +69,24 @@ namespace WorldSimulation.Controllers
 
             return Ok(data);
         }
+         
+        [HttpGet("weather-snapshot")]
+        public IActionResult GetWeatherSnapshot()
+        {
+            if (!_mapProvider.HasMap())
+                return BadRequest("Harita henüz oluşturulmadı. Lütfen önce /api/map/generate endpoint’ini çağırın.");
 
-        // Yardımcı metodlar
+            var map = _mapProvider.GetMap();
+
+            _weatherService.UpdateWeather(map, DateTime.Now);
+            var snapshot = _weatherService.GetWeatherSnapshot(map, DateTime.Now);
+
+            return Ok(snapshot);
+        }
+
+
+
+        #region Yardımcı Private metodlar
         private string GetRandomWeather()
         {
             string[] conditions = { "Güneşli", "Yağmurlu", "Bulutlu", "Fırtınalı", "Karl", "Sisli" };
@@ -77,6 +98,7 @@ namespace WorldSimulation.Controllers
             string[] cities = { "İstanbul", "Ankara", "İzmir", "Bursa", "Antalya", "Trabzon" };
             return cities[new Random().Next(cities.Length)];
         }
+        #endregion
     }
 
 }

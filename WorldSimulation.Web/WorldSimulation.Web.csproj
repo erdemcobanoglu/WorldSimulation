@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\WorldSimulation.Application\WorldSimulation.Application.csproj" />
     <ProjectReference Include="..\WorldSimulation.Domain\WorldSimulation.Domain.csproj" />
+    <ProjectReference Include="..\WorldSimulation.Infrastructure\WorldSimulation.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

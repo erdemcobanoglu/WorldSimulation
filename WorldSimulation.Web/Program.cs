@@ -1,13 +1,15 @@
 ﻿using WorldSimulation.Application.Interfaces;
 using WorldSimulation.Application.Service;
 using WorldSimulation.Application.WorldMapService;
+using WorldSimulation.Infrastructure.Providers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IWorldMapService, WorldMapService>();
-builder.Services.AddScoped<IWeatherService, WeatherService>();
+builder.Services.AddScoped<IWeatherService, WeatherService>(); 
+builder.Services.AddSingleton<IMapProvider, MapProvider>();
 
 // ✅ CORS yapılandırması
 builder.Services.AddCors(options =>

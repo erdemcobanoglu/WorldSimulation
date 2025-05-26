@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WorldSimulation.Application.Dto;
 using WorldSimulation.Application.Interfaces;
 using WorldSimulation.Domain.Entities;
 using WorldSimulation.Domain.Enums;
@@ -40,6 +41,32 @@ namespace WorldSimulation.Application.Service
                     map.Tiles[x, y].CurrentWeather = currentWeather;
                 }
             }
+        }
+
+        public WeatherSnapshotDto GetWeatherSnapshot(WorldMap map, DateTime time)
+        {
+            var tiles = new List<TileWeatherDto>();
+
+            for (int x = 0; x < map.Width; x++)
+            {
+                for (int y = 0; y < map.Height; y++)
+                {
+                    var tile = map.Tiles[x, y];
+
+                    tiles.Add(new TileWeatherDto
+                    {
+                        X = tile.X,
+                        Y = tile.Y,
+                        Weather = tile.CurrentWeather.ToString()
+                    });
+                }
+            }
+
+            return new WeatherSnapshotDto
+            {
+                Time = time,
+                Tiles = tiles
+            };
         }
 
     }
