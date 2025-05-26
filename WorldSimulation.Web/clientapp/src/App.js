@@ -1,11 +1,11 @@
-import React from "react";
-import WeatherInfo from "./components/WeatherInfo";
+﻿import React from "react";
+import MapViewer from "./components/MapViewer"; // dosya yolu doğruysa
 
 function App() {
     return (
         <div className="App">
-            <h1>World Simulation</h1>
-            <WeatherInfo />
+            <h2>Hava Durumu Haritası</h2>
+            <MapViewer />
         </div>
     );
 }
