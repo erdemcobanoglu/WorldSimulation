@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WorldSimulation.Application.Interfaces
+namespace WorldSimulation.Domain.Interfaces
 {
     public interface IWorldEvent
     {

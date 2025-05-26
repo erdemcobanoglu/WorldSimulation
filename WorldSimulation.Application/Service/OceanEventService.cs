@@ -100,7 +100,7 @@ namespace WorldSimulation.Application.Service
 
             return new OceanEvent
             {
-                EventType = eventType,
+                OceanEventType = eventType,
                 Location = selectedTile,
                 Duration = duration,
                 Intensity = intensity,
@@ -116,7 +116,8 @@ namespace WorldSimulation.Application.Service
             var tile = oceanEvent.Location;
 
             // Mevcut etkisini yaz (mantıksal işaretleme)
-            tile.CurrentOceanEvent = oceanEvent.EventType;
+            tile.CurrentOceanEvent = oceanEvent.OceanEventType;
+
         }
     }
 

@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WorldSimulation.Application.Dto;
 using WorldSimulation.Domain.Entities;
 
 namespace WorldSimulation.Application.Interfaces
 { 
     public interface IWeatherSimulationEngine
     {
-        List<SimulationSnapshot> Run(WorldMap map, int maxTicks = 100);
+        List<SimulationSnapshotDto> Run(WorldMap map, int maxTicks = 100);
 
     }
 }

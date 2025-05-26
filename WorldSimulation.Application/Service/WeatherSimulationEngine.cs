@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WorldSimulation.Application.Dto;
 using WorldSimulation.Application.Interfaces;
 using WorldSimulation.Domain.Entities;
 using WorldSimulation.Domain.Entities.Event;
@@ -12,23 +13,23 @@ namespace WorldSimulation.Application.Service
 {
     public class WeatherSimulationEngine : IWeatherSimulationEngine
     {
-        private readonly IWeatherService _weatherService; 
+        private readonly IWeatherService _weatherService;
         private readonly IOceanEventService _oceanEventService;
-         
+
         public WeatherSimulationEngine(IWeatherService weatherService)
         {
             _weatherService = weatherService;
         }
-         
+
         public WeatherSimulationEngine(IWeatherService weatherService, IOceanEventService oceanEventService)
         {
             _weatherService = weatherService;
             _oceanEventService = oceanEventService;
         }
 
-        public List<SimulationSnapshot> Run(WorldMap map, int maxTicks)
+        public List<SimulationSnapshotDto> Run(WorldMap map, int maxTicks)
         {
-            var snapshots = new List<SimulationSnapshot>();
+            var snapshots = new List<SimulationSnapshotDto>();
 
             for (int tick = 0; tick < maxTicks; tick++)
             {
@@ -46,7 +47,7 @@ namespace WorldSimulation.Application.Service
             return snapshots;
         }
 
-        private SimulationSnapshot CreateSnapshot(WorldMap map, DateTime currentTime)
+        private SimulationSnapshotDto CreateSnapshot(WorldMap map, DateTime currentTime)
         {
             var y = 0;
 
@@ -82,17 +83,17 @@ namespace WorldSimulation.Application.Service
             }
 
             var activeEvents = _oceanEventService?.GetActiveEvents()
-                .Select(ev => new OceanEvent
-                {
-                    EventType = ev.EventType,
-                    Y = ev.Location.X,
-                    X = ev.Location.Y,
-                    Intensity = ev.Intensity,
-                    Duration = ev.Duration,
-                    StartTime = ev.StartTime
-                }).ToList() ?? new List<OceanEvent>();
+            .Select(ev => new OceanEventDto
+            {
+                EventType = ev.OceanEventType.ToString(),
+                X = ev.Location.X,
+                Y = ev.Location.Y,
+                Intensity = ev.Intensity,
+                Duration = ev.Duration,
+                StartTime = ev.StartTime
+            }).ToList() ?? new List<OceanEventDto>();
 
-            return new SimulationSnapshot
+            return new SimulationSnapshotDto
             {
                 Time = currentTime,
                 Atmosphere = atmosphere,
@@ -103,77 +104,78 @@ namespace WorldSimulation.Application.Service
         }
 
 
-        private void PrintMap(WorldMap map)
-        {
-            int y = 0; // sadece ilk satır çizilecek
+        #region Old Code
+        //private void PrintMap(WorldMap map)
+        //{
+        //    int y = 0; // sadece ilk satır çizilecek
 
-            // 🟦 Atmosfer
-            Console.Write("Atmosfer:  ");
-            for (int x = 0; x < map.Width; x++)
-            {
-                Tile tile = map.Tiles[x, y];
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.Write(GetWeatherSymbol(tile.CurrentWeather));
-            }
-            Console.WriteLine();
+        //    // 🟦 Atmosfer
+        //    Console.Write("Atmosfer:  ");
+        //    for (int x = 0; x < map.Width; x++)
+        //    {
+        //        Tile tile = map.Tiles[x, y];
+        //        Console.ForegroundColor = ConsoleColor.White;
+        //        Console.Write(GetWeatherSymbol(tile.CurrentWeather));
+        //    }
+        //    Console.WriteLine();
 
-            // 🌊 Okyanus
-            Console.Write("Okyanus:   ");
-            for (int x = 0; x < map.Width; x++)
-            {
-                Tile tile = map.Tiles[x, y];
+        //    // 🌊 Okyanus
+        //    Console.Write("Okyanus:   ");
+        //    for (int x = 0; x < map.Width; x++)
+        //    {
+        //        Tile tile = map.Tiles[x, y];
 
-                if (tile.Terrain == TerrainType.Sea)
-                {
-                    if (tile.CurrentOceanEvent != null)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Cyan;
-                        Console.Write("🌊"); // olay varsa göster
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.Blue;
-                        Console.Write("~"); // deniz ama olay yoksa simge
-                    }
-                }
-                else
-                {
-                    Console.Write(" "); // deniz değilse boşluk bırak
-                }
-            }
-            Console.WriteLine();
-
-
-            // 🌍 Yüzey
-            Console.Write("Yüzey:     ");
-            for (int x = 0; x < map.Width; x++)
-            {
-                Tile tile = map.Tiles[x, y];
-
-                Console.ForegroundColor = tile.Terrain switch
-                {
-                    TerrainType.Land => ConsoleColor.Green,
-                    TerrainType.Sea => ConsoleColor.Blue,
-                    TerrainType.Air => ConsoleColor.White,
-                    _ => ConsoleColor.Gray
-                };
-
-                string symbol = tile.Terrain switch
-                {
-                    TerrainType.Land => "L",
-                    TerrainType.Sea => "S",
-                    TerrainType.Air => "A",
-                    _ => "?"
-                };
-
-                Console.Write(symbol);
-            }
-
-            Console.ResetColor();
-            Console.WriteLine("\n");
-        }
+        //        if (tile.Terrain == TerrainType.Sea)
+        //        {
+        //            if (tile.CurrentOceanEvent != null)
+        //            {
+        //                Console.ForegroundColor = ConsoleColor.Cyan;
+        //                Console.Write("🌊"); // olay varsa göster
+        //            }
+        //            else
+        //            {
+        //                Console.ForegroundColor = ConsoleColor.Blue;
+        //                Console.Write("~"); // deniz ama olay yoksa simge
+        //            }
+        //        }
+        //        else
+        //        {
+        //            Console.Write(" "); // deniz değilse boşluk bırak
+        //        }
+        //    }
+        //    Console.WriteLine();
 
 
+        //    // 🌍 Yüzey
+        //    Console.Write("Yüzey:     ");
+        //    for (int x = 0; x < map.Width; x++)
+        //    {
+        //        Tile tile = map.Tiles[x, y];
+
+        //        Console.ForegroundColor = tile.Terrain switch
+        //        {
+        //            TerrainType.Land => ConsoleColor.Green,
+        //            TerrainType.Sea => ConsoleColor.Blue,
+        //            TerrainType.Air => ConsoleColor.White,
+        //            _ => ConsoleColor.Gray
+        //        };
+
+        //        string symbol = tile.Terrain switch
+        //        {
+        //            TerrainType.Land => "L",
+        //            TerrainType.Sea => "S",
+        //            TerrainType.Air => "A",
+        //            _ => "?"
+        //        };
+
+        //        Console.Write(symbol);
+        //    }
+
+        //    Console.ResetColor();
+        //    Console.WriteLine("\n");
+        //}
+         
+        #endregion
         private string GetWeatherSymbol(WeatherType weather)
         {
             return weather switch

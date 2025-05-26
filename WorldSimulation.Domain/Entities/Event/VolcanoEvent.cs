@@ -4,19 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WorldSimulation.Domain.Interfaces;
-using WorldSimulation.Domain.Enums;
 
 namespace WorldSimulation.Domain.Entities.Event
 {
-    public class OceanEvent : IWorldEvent
+    public class VolcanoEvent: IWorldEvent
     {
-        public OceanEventType OceanEventType { get; set; }
         public Tile Location { get; set; }
         public int Duration { get; set; }
         public double Intensity { get; set; }
         public DateTime StartTime { get; set; }
 
-        public string EventType => OceanEventType.ToString();
+        public string EventType => "Volcano";
         public int X => Location.X;
         public int Y => Location.Y;
     }
