@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WorldSimulation.Application.Interfaces;
 using WorldSimulation.Domain.Entities;
+using WorldSimulation.Domain.Entities.Event;
 using WorldSimulation.Domain.Enums;
 
 namespace WorldSimulation.Application.Service
@@ -25,46 +26,80 @@ namespace WorldSimulation.Application.Service
             _oceanEventService = oceanEventService;
         }
 
-        public void Run(WorldMap map, int maxTicks)
+        public List<SimulationSnapshot> Run(WorldMap map, int maxTicks)
         {
-            int tick = 0;
+            var snapshots = new List<SimulationSnapshot>();
 
-            while (tick < maxTicks)
+            for (int tick = 0; tick < maxTicks; tick++)
             {
-                Console.Clear();
                 var currentTime = DateTime.Now;
 
-                // ☁️ Hava durumu güncelle
                 _weatherService.UpdateWeather(map, currentTime);
-
-                // 🌊 Okyanus olaylarını güncelle
                 _oceanEventService?.Update(currentTime);
 
-                // 🖨 Haritayı yazdır
-                PrintMap(map);
+                var snapshot = CreateSnapshot(map, currentTime);
+                snapshots.Add(snapshot);
 
-                // 🎯 Okyanus olaylarını tek satırda yaz
-                if (_oceanEventService != null)
-                {
-                    // Konumu ayarla (örneğin en alt satıra yakın bir yere)
-                    int line = Console.CursorTop;
-                    Console.SetCursorPosition(0, line);
-
-                    var activeEvents = _oceanEventService.GetActiveEvents();
-
-                    string lineText = "Olaylar: ";
-                    foreach (var evt in activeEvents)
-                    {
-                        lineText += $"[{evt.EventType} @({evt.Location.X},{evt.Location.Y}) I:{evt.Intensity:F1}] ";
-                    }
-
-                    // Satırı temizle (görsel çakışmayı önlemek için)
-                    Console.Write(lineText.PadRight(Console.WindowWidth));
-                }
-
-                tick++;
                 Thread.Sleep(1000);
             }
+
+            return snapshots;
+        }
+
+        private SimulationSnapshot CreateSnapshot(WorldMap map, DateTime currentTime)
+        {
+            var y = 0;
+
+            var atmosphere = new List<string>();
+            var ocean = new List<string>();
+            var surface = new List<string>();
+
+            for (int x = 0; x < map.Width; x++)
+            {
+                var tile = map.Tiles[x, y];
+
+                // Atmosfer
+                atmosphere.Add(GetWeatherSymbol(tile.CurrentWeather));
+
+                // Okyanus
+                if (tile.Terrain == TerrainType.Sea)
+                {
+                    ocean.Add(tile.CurrentOceanEvent != null ? "🌊" : "~");
+                }
+                else
+                {
+                    ocean.Add(" ");
+                }
+
+                // Yüzey
+                surface.Add(tile.Terrain switch
+                {
+                    TerrainType.Land => "L",
+                    TerrainType.Sea => "S",
+                    TerrainType.Air => "A",
+                    _ => "?"
+                });
+            }
+
+            var activeEvents = _oceanEventService?.GetActiveEvents()
+                .Select(ev => new OceanEvent
+                {
+                    EventType = ev.EventType,
+                    Y = ev.Location.X,
+                    X = ev.Location.Y,
+                    Intensity = ev.Intensity,
+                    Duration = ev.Duration,
+                    StartTime = ev.StartTime
+                }).ToList() ?? new List<OceanEvent>();
+
+            return new SimulationSnapshot
+            {
+                Time = currentTime,
+                Atmosphere = atmosphere,
+                Ocean = ocean,
+                Surface = surface,
+                ActiveEvents = activeEvents
+            };
         }
 
 

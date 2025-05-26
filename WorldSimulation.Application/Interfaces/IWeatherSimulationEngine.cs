@@ -9,7 +9,7 @@ namespace WorldSimulation.Application.Interfaces
 { 
     public interface IWeatherSimulationEngine
     {
-        void Run(WorldMap map, int maxTicks = 100);
+        List<SimulationSnapshot> Run(WorldMap map, int maxTicks = 100);
 
     }
 }

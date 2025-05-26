@@ -11,18 +11,9 @@ namespace WorldSimulation.Domain.Entities
     {
         public int X { get; set; }
         public int Y { get; set; }
-        public TerrainType Terrain { get; set; } 
-        public OceanEventType? CurrentOceanEvent { get; set; } = null;
+        public TerrainType Terrain { get; set; }
+        public OceanEventType? CurrentOceanEvent { get; set; }
         public WeatherType CurrentWeather { get; set; } = WeatherType.Sunny;
-
-
-        public Tile() { }
-        public Tile(int x, int y)
-        {
-            X = x;
-            Y = y;
-            Terrain = TerrainType.Unknown; // veya varsayılan neyse
-        }
 
     }
 }

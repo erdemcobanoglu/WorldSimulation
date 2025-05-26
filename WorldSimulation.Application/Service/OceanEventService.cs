@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WorldSimulation.Application.Interfaces;
 using WorldSimulation.Domain.Entities;
+using WorldSimulation.Domain.Entities.Event;
 using WorldSimulation.Domain.Enums;
 
 namespace WorldSimulation.Application.Service
