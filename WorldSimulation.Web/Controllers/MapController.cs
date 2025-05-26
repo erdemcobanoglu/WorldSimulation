@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WorldSimulation.Application.Dto;
 using WorldSimulation.Application.Interfaces;
 using WorldSimulation.Application.Service;
 using WorldSimulation.Application.WorldMapService;
@@ -35,20 +36,47 @@ namespace WorldSimulation.Controllers
             return Ok(result); // 👈 JSON list
         }
 
-        // https://localhost:7260/api/map/generate
+        // https://localhost:7260/api/map/generate 
         [HttpGet("generate")]
         public IActionResult Generate()
         {
             var map = _mapService.CreateMap(30, 10);
 
-            // Bu servisler parametreye bağlı olduğu için new ile oluşturuluyor
+            _mapProvider.SetMap(map); // 🔥 Haritayı sakla
+
             var oceanEventService = new OceanEventService(map);
             var simulation = new WeatherSimulationEngine(_weatherService, oceanEventService);
+            simulation.Run(map, 50);
 
-            simulation.Run(map, 100);
+            // DTO'ya dönüştür
+            var flatTiles = new List<TileDto>();
 
-            return Ok(map);
+            for (int x = 0; x < map.Width; x++)
+            {
+                for (int y = 0; y < map.Height; y++)
+                {
+                    var tile = map.Tiles[x, y];
+                    flatTiles.Add(new TileDto
+                    {
+                        X = x,
+                        Y = y,
+                        Terrain = tile.Terrain.ToString(),
+                        Weather = tile.CurrentWeather.ToString(),
+                        OceanEvent = tile.CurrentOceanEvent?.ToString()
+                    });
+                }
+            }
+
+            var dto = new MapDto
+            {
+                Width = map.Width,
+                Height = map.Height,
+                Tiles = flatTiles
+            };
+
+            return Ok(dto);
         }
+
 
         // https://localhost:7260/api/map/generatev2
         [HttpGet("generatev2")]
