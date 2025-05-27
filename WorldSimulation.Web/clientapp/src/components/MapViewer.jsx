@@ -110,7 +110,7 @@ const MapViewer = () => {
 
     return (
         <div className="map">
-            <h2>Hava Durumu Haritası</h2>
+            {/*<h2>Hava Durumu Haritası</h2>*/}
             {loading && <p>Yükleniyor...</p>}
             {error && <p style={{ color: "red" }}>Hata: {error}</p>}
             {!loading && !error && renderGrid()}
