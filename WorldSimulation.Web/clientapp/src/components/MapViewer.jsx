@@ -17,6 +17,18 @@ const oceanEventSymbols = {
     Tsunami: "🌋"
 };
 
+const terrainIcons = {
+    mountain: "⛰️",
+    desert: "🏜️",
+    island: "🏝️",
+    land: "🏘️"
+};
+
+const dynamicTerrainMap = {
+    Rainy: { Land: "Mud" },
+    Snowy: { Land: "Ice" }
+};
+
 const formatTerrain = (terrain) => {
     if (!terrain || typeof terrain !== "string") return "Unknown";
     const normalized = terrain.trim().toLowerCase();
@@ -30,6 +42,11 @@ const formatTerrain = (terrain) => {
         case "island": return "Island";
         default: return "Unknown";
     }
+};
+
+const applyWeatherEffect = (terrain, weather) => {
+    const weatherEffects = dynamicTerrainMap[weather];
+    return weatherEffects && weatherEffects[terrain] ? weatherEffects[terrain] : terrain;
 };
 
 const getTimePhase = (hour) => {
@@ -80,10 +97,12 @@ const MapViewer = () => {
             for (let x = viewportX; x < Math.min(viewportX + viewWidth, width); x++) {
                 const tile = tiles.find((t) => t?.x === x && t?.y === y);
                 const content = tile ? (tile.oceanEvent ? getOceanSymbol(tile.oceanEvent) : getWeatherSymbol(tile.weather)) : "";
-                const terrainClass = tile ? formatTerrain(tile.terrain) : "Unknown";
+                const baseTerrain = tile ? formatTerrain(tile.terrain) : "Unknown";
+                const effectiveTerrain = tile ? applyWeatherEffect(baseTerrain, tile.weather) : "Unknown";
                 const localHour = tile ? getLocalHour(timeOfDay, tile.x, width) : 12;
                 const brightness = getTileBrightness(localHour);
-                const tileClass = `tile ${terrainClass} ${tile?.weather} ${tile?.oceanEvent ? "ocean" : ""}`;
+                const tileClass = `tile ${effectiveTerrain} ${tile?.weather} ${tile?.oceanEvent ? "ocean" : ""}`;
+                const overlayIcon = terrainIcons[baseTerrain.toLowerCase()] || "";
 
                 row.push(
                     <div
@@ -93,11 +112,13 @@ const MapViewer = () => {
                             width: tileSize,
                             height: tileSize,
                             fontSize: tileSize * 0.75,
-                            filter: `brightness(${brightness})`
+                            filter: `brightness(${brightness})`,
+                            position: "relative"
                         }}
                         onClick={() => tile && setSelectedTile(tile)}
                     >
                         {content}
+                        {overlayIcon && <span className="overlay-icon">{overlayIcon}</span>}
                     </div>
                 );
             }
@@ -199,8 +220,8 @@ const MapViewer = () => {
                     <strong>Koordinat:</strong> ({selectedTile.x}, {selectedTile.y})<br />
                     <strong>Terrain:</strong> {selectedTile.terrain}<br />
                     <strong>Weather:</strong> {selectedTile.weather}<br />
-                    <strong>Küresel Saat:</strong> {timeOfDay}:00 ({isNight ? "Night" : "Day"})<br />
-                    <strong>Yerel Saat:</strong> {getLocalHour(timeOfDay, selectedTile.x, width)}:00<br />
+                    <strong>Global Time::</strong> {timeOfDay}:00 ({isNight ? "Night" : "Day"})<br />
+                    <strong>Local Time::</strong> {getLocalHour(timeOfDay, selectedTile.x, width)}:00<br />
                     {selectedTile.oceanEvent && (
                         <><strong>Ocean Event:</strong> {selectedTile.oceanEvent}</>
                     )}
