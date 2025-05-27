@@ -29,28 +29,50 @@ namespace WorldSimulation.Application.Service
 
         public void UpdateWeather(WorldMap map, DateTime currentTime)
         {
-            var weatherOptions = Enum.GetValues(typeof(WeatherType));
-            var oceanEvents = Enum.GetValues(typeof(OceanEventType));
             var rand = new Random();
 
             foreach (var tile in map.Tiles)
             {
-                // Yeni güncellenen çift alanlar
-                tile.CurrentWeather = (WeatherType)weatherOptions.GetValue(rand.Next(weatherOptions.Length));
-                tile.CurrentWeather = (WeatherType)weatherOptions.GetValue(rand.Next(weatherOptions.Length));
+                WeatherType weather;
 
+                switch (tile.Terrain)
+                {
+                    case TerrainType.Desert:
+                        weather = rand.NextDouble() < 0.8 ? WeatherType.Sunny : WeatherType.Cloudy;
+                        break;
+
+                    case TerrainType.Mountain:
+                        weather = rand.NextDouble() < 0.5 ? WeatherType.Snowy : WeatherType.Stormy;
+                        break;
+
+                    case TerrainType.Ice:
+                        weather = WeatherType.Snowy;
+                        break;
+
+                    case TerrainType.Sea:
+                        weather = rand.NextDouble() < 0.5 ? WeatherType.Stormy : WeatherType.Rainy;
+                        break;
+
+                    case TerrainType.Island:
+                        weather = rand.NextDouble() < 0.4 ? WeatherType.Sunny : WeatherType.Rainy;
+                        break;
+
+                    default: // Land, Air vs.
+                        weather = (WeatherType)rand.Next(Enum.GetValues(typeof(WeatherType)).Length);
+                        break;
+                }
+
+                tile.CurrentWeather = weather; 
+
+                // Ocean events sadece Sea için
                 if (tile.Terrain == TerrainType.Sea)
                 {
-                    var randomOceanEvent = rand.NextDouble() < 0.5
-                        ? (OceanEventType?)oceanEvents.GetValue(rand.Next(oceanEvents.Length))
+                    tile.CurrentOceanEvent = rand.NextDouble() < 0.4
+                        ? (OceanEventType?)rand.Next(Enum.GetValues(typeof(OceanEventType)).Length)
                         : null;
-
-                    tile.CurrentOceanEvent = randomOceanEvent;
-                    tile.CurrentOceanEvent = randomOceanEvent;
                 }
                 else
                 {
-                    tile.CurrentOceanEvent = null;
                     tile.CurrentOceanEvent = null;
                 }
             }

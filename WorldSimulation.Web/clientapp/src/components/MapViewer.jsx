@@ -19,30 +19,18 @@ const oceanEventSymbols = {
 
 const formatTerrain = (terrain) => {
     if (!terrain || typeof terrain !== "string") return "Unknown";
-
-    // Haritaya uygun terrain sınıflarını normalize et
     const normalized = terrain.trim().toLowerCase();
-
     switch (normalized) {
-        case "land":
-            return "Land";
-        case "sea":
-            return "Sea";
-        case "air":
-            return "Air";
-        case "mountain":
-            return "Mountain";
-        case "desert":
-            return "Desert";
-        case "ice":
-            return "Ice";
-        case "island":
-            return "Island";
-        default:
-            return "Unknown";
+        case "land": return "Land";
+        case "sea": return "Sea";
+        case "air": return "Air";
+        case "mountain": return "Mountain";
+        case "desert": return "Desert";
+        case "ice": return "Ice";
+        case "island": return "Island";
+        default: return "Unknown";
     }
 };
-
 
 const MapViewer = () => {
     const [tiles, setTiles] = useState([]);
@@ -50,6 +38,12 @@ const MapViewer = () => {
     const [height, setHeight] = useState(0);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [selectedTile, setSelectedTile] = useState(null);
+
+    const [viewportX, setViewportX] = useState(0);
+    const [viewportY, setViewportY] = useState(0);
+    const viewWidth = 15;
+    const viewHeight = 10;
 
     const getWeatherSymbol = (weather) => weatherSymbols[weather] || "❔";
     const getOceanSymbol = (event) => oceanEventSymbols[event] || "⚠️";
@@ -57,22 +51,26 @@ const MapViewer = () => {
     const renderGrid = () => {
         const grid = [];
 
-        for (let y = 0; y < height; y++) {
+        for (let y = viewportY; y < Math.min(viewportY + viewHeight, height); y++) {
             const row = [];
-            for (let x = 0; x < width; x++) {
-                const tile = tiles.find((t) => t.x === x && t.y === y);
+            for (let x = viewportX; x < Math.min(viewportX + viewWidth, width); x++) {
+                const tile = tiles.find((t) => t?.x === x && t?.y === y);
 
                 const content = tile
                     ? tile.oceanEvent
                         ? getOceanSymbol(tile.oceanEvent)
                         : getWeatherSymbol(tile.weather)
-                    : "❌";
+                    : ""; // ❌ yerine boş göster
 
                 const terrainClass = tile ? formatTerrain(tile.terrain) : "Unknown";
                 const tileClass = `tile ${terrainClass} ${tile?.oceanEvent ? "ocean" : ""}`;
 
                 row.push(
-                    <div key={`${x}-${y}`} className={tileClass}>
+                    <div
+                        key={`${x}-${y}`}
+                        className={tileClass}
+                        onClick={() => tile && setSelectedTile(tile)}
+                    >
                         {content}
                     </div>
                 );
@@ -101,6 +99,11 @@ const MapViewer = () => {
                 setTiles(data.tiles);
                 setWidth(maxX + 1);
                 setHeight(maxY + 1);
+
+                // viewport taşmasın
+                setViewportX((prev) => Math.min(prev, maxX + 1 - viewWidth));
+                setViewportY((prev) => Math.min(prev, maxY + 1 - viewHeight));
+
                 setError(null);
             })
             .catch((err) => {
@@ -110,7 +113,6 @@ const MapViewer = () => {
             .finally(() => setLoading(false));
     };
 
-    // Sayfa ilk açıldığında haritayı oluştur ve snapshot'ı başlat
     useEffect(() => {
         fetch("https://localhost:7260/api/map/generate")
             .then((res) => {
@@ -118,10 +120,8 @@ const MapViewer = () => {
                 return res.json();
             })
             .then(() => {
-                loadSnapshot(); // İlk snapshot
-                const interval = setInterval(() => {
-                    loadSnapshot(); // Her 5 saniyede bir güncelle
-                }, 5000);
+                loadSnapshot();
+                const interval = setInterval(() => loadSnapshot(), 5000);
                 return () => clearInterval(interval);
             })
             .catch((err) => {
@@ -130,12 +130,35 @@ const MapViewer = () => {
             });
     }, []);
 
+    // WASD kontrolü (viewport sınırları içinde tut)
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === "w") setViewportY((y) => Math.max(0, y - 1));
+            if (e.key === "s") setViewportY((y) => Math.min(height - viewHeight, y + 1));
+            if (e.key === "a") setViewportX((x) => Math.max(0, x - 1));
+            if (e.key === "d") setViewportX((x) => Math.min(width - viewWidth, x + 1));
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [width, height]);
+
     return (
         <div className="map">
-            {/*<h2>Hava Durumu Haritası</h2>*/}
             {loading && <p>Yükleniyor...</p>}
             {error && <p style={{ color: "red" }}>Hata: {error}</p>}
-            {!loading && !error && renderGrid()}
+            {!loading && !error && tiles.length > 0 && renderGrid()}
+
+            {selectedTile && (
+                <div style={{ marginTop: "15px", padding: "8px", border: "1px solid #ccc", borderRadius: "5px", backgroundColor: "#fafafa" }}>
+                    <strong>Koordinat:</strong> ({selectedTile.x}, {selectedTile.y})<br />
+                    <strong>Terrain:</strong> {selectedTile.terrain}<br />
+                    <strong>Weather:</strong> {selectedTile.weather}<br />
+                    {selectedTile.oceanEvent && (
+                        <><strong>Ocean Event:</strong> {selectedTile.oceanEvent}</>
+                    )}
+                </div>
+            )}
         </div>
     );
 };
