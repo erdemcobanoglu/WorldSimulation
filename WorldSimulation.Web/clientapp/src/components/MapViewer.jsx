@@ -77,7 +77,7 @@ const MapViewer = () => {
     const [selectedTile, setSelectedTile] = useState(null);
     const [viewportX, setViewportX] = useState(0);
     const [viewportY, setViewportY] = useState(0);
-    const [tileSize, setTileSize] = useState(32);
+    const [tileSize, setTileSize] = useState(45);
     const [timeOfDay, setTimeOfDay] = useState(12);
     const [autoAdvance, setAutoAdvance] = useState(true);
     const [forward, setForward] = useState(true);
@@ -259,15 +259,20 @@ const MapViewer = () => {
             if (e.key === "s") setViewportY((y) => Math.min(height - viewHeight, y + 1));
             if (e.key === "a") setViewportX((x) => Math.max(0, x - 1));
             if (e.key === "d") setViewportX((x) => Math.min(width - viewWidth, x + 1));
-            if (e.key === "+") setTileSize((size) => Math.min(size + 4, 64));
-            if (e.key === "-") setTileSize((size) => Math.max(size - 4, 16));
+            if (e.key === "+") setTileSize((size) => Math.min(size + 4, 80));
+            if (e.key === "-") setTileSize((size) => Math.max(size - 4, 24)); 
         };
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [width, height]);
 
     return (
-        <div className={`map ${getTimePhase(timeOfDay)}`}>
+        <div className={`map ${getTimePhase(timeOfDay)}`} style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center"
+        }}>
             {loading && <p>Yükleniyor...</p>}
             {error && <p style={{ color: "red" }}>Hata: {error}</p>}
             {!loading && !error && tiles.length > 0 && renderGrid()}
