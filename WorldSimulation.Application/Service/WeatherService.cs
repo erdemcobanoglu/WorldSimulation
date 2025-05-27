@@ -29,19 +29,33 @@ namespace WorldSimulation.Application.Service
 
         public void UpdateWeather(WorldMap map, DateTime currentTime)
         {
-            int tick = (int)(currentTime - DateTime.Today).TotalSeconds;
+            var weatherOptions = Enum.GetValues(typeof(WeatherType));
+            var oceanEvents = Enum.GetValues(typeof(OceanEventType));
+            var rand = new Random();
 
-            WeatherType currentWeather = GetCurrentWeather(tick);
-
-            // Haritadaki tüm tile'lara hava durumu uygula
-            for (int x = 0; x < map.Width; x++)
+            foreach (var tile in map.Tiles)
             {
-                for (int y = 0; y < map.Height; y++)
+                // Yeni güncellenen çift alanlar
+                tile.CurrentWeather = (WeatherType)weatherOptions.GetValue(rand.Next(weatherOptions.Length));
+                tile.CurrentWeather = (WeatherType)weatherOptions.GetValue(rand.Next(weatherOptions.Length));
+
+                if (tile.Terrain == TerrainType.Sea)
                 {
-                    map.Tiles[x, y].CurrentWeather = currentWeather;
+                    var randomOceanEvent = rand.NextDouble() < 0.5
+                        ? (OceanEventType?)oceanEvents.GetValue(rand.Next(oceanEvents.Length))
+                        : null;
+
+                    tile.CurrentOceanEvent = randomOceanEvent;
+                    tile.CurrentOceanEvent = randomOceanEvent;
+                }
+                else
+                {
+                    tile.CurrentOceanEvent = null;
+                    tile.CurrentOceanEvent = null;
                 }
             }
         }
+
 
         public WeatherSnapshotDto GetWeatherSnapshot(WorldMap map, DateTime time)
         {
