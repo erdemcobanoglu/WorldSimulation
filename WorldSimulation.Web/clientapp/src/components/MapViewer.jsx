@@ -18,9 +18,31 @@ const oceanEventSymbols = {
 };
 
 const formatTerrain = (terrain) => {
-    if (!terrain) return "Unknown";
-    return terrain.charAt(0).toUpperCase() + terrain.slice(1).toLowerCase();
+    if (!terrain || typeof terrain !== "string") return "Unknown";
+
+    // Haritaya uygun terrain sınıflarını normalize et
+    const normalized = terrain.trim().toLowerCase();
+
+    switch (normalized) {
+        case "land":
+            return "Land";
+        case "sea":
+            return "Sea";
+        case "air":
+            return "Air";
+        case "mountain":
+            return "Mountain";
+        case "desert":
+            return "Desert";
+        case "ice":
+            return "Ice";
+        case "island":
+            return "Island";
+        default:
+            return "Unknown";
+    }
 };
+
 
 const MapViewer = () => {
     const [tiles, setTiles] = useState([]);

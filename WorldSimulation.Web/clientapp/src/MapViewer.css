@@ -59,3 +59,22 @@ button {
     button:hover {
         background-color: #005fa3;
     }
+.tile.Mountain {
+    background-color: #6B4226; /* dağ kahverengisi */
+    color: white;
+}
+
+.tile.Desert {
+    background-color: #F4A460; /* kum sarısı */
+    color: black;
+}
+
+.tile.Ice {
+    background-color: #e0f7ff; /* buz beyazı */
+    color: black;
+}
+
+.tile.Island {
+    background-color: #3cb371; /* yeşilimsi ada */
+    color: white;
+}

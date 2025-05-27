@@ -8,9 +8,12 @@ namespace WorldSimulation.Domain.Enums
 {
     public enum TerrainType
     {
-        Land,
-        Sea,
-        Air,
-        Unknown
+        Sea = 0,
+        Land = 1,
+        Air = 2,
+        Mountain = 3,
+        Desert = 4,
+        Ice = 5,
+        Island = 6
     }
 }
