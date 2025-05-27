@@ -57,7 +57,8 @@ namespace WorldSimulation.Application.Service
                     {
                         X = tile.X,
                         Y = tile.Y,
-                        Weather = tile.CurrentWeather.ToString()
+                        Weather = tile.CurrentWeather.ToString(),
+                        Terrain = tile.Terrain.ToString(),
                     });
                 }
             }

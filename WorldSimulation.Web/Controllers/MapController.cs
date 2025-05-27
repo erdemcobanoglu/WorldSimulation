@@ -98,6 +98,7 @@ namespace WorldSimulation.Controllers
             return Ok(data);
         }
          
+
         [HttpGet("weather-snapshot")]
         public IActionResult GetWeatherSnapshot()
         {
