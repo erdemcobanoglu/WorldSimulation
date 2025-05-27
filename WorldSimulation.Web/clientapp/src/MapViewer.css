@@ -173,3 +173,7 @@ button {
     font-size: 10px;
     opacity: 0.7;
 }
+.tile.path {
+    outline: 2px solid yellow;
+    box-shadow: 0 0 6px 2px yellow;
+}

@@ -81,6 +81,9 @@ const MapViewer = () => {
     const [timeOfDay, setTimeOfDay] = useState(12);
     const [autoAdvance, setAutoAdvance] = useState(true);
     const [forward, setForward] = useState(true);
+    const [startTile, setStartTile] = useState(null);
+    const [endTile, setEndTile] = useState(null);
+    const [path, setPath] = useState([]);
 
     const viewWidth = 15;
     const viewHeight = 10;
@@ -88,6 +91,63 @@ const MapViewer = () => {
 
     const getWeatherSymbol = (weather) => weatherSymbols[weather] || "❔";
     const getOceanSymbol = (event) => oceanEventSymbols[event] || "⚠️";
+
+    const isWalkable = (terrain) => ["Land", "Mud", "Ice", "Desert"].includes(terrain);
+
+    const findPath = (start, end) => {
+        const openSet = [start];
+        const cameFrom = {};
+        const gScore = {};
+        const fScore = {};
+
+        const key = (x, y) => `${x},${y}`;
+
+        gScore[key(start.x, start.y)] = 0;
+        fScore[key(start.x, start.y)] = Math.abs(start.x - end.x) + Math.abs(start.y - end.y);
+
+        while (openSet.length > 0) {
+            openSet.sort((a, b) => (fScore[key(a.x, a.y)] || Infinity) - (fScore[key(b.x, b.y)] || Infinity));
+            const current = openSet.shift();
+
+            if (current.x === end.x && current.y === end.y) {
+                const path = [];
+                let currKey = key(end.x, end.y);
+                while (cameFrom[currKey]) {
+                    path.unshift(cameFrom[currKey]);
+                    currKey = key(cameFrom[currKey].x, cameFrom[currKey].y);
+                }
+                return path;
+            }
+
+            const neighbors = [
+                { x: current.x + 1, y: current.y },
+                { x: current.x - 1, y: current.y },
+                { x: current.x, y: current.y + 1 },
+                { x: current.x, y: current.y - 1 }
+            ];
+
+            for (const neighbor of neighbors) {
+                if (neighbor.x < 0 || neighbor.x >= width || neighbor.y < 0 || neighbor.y >= height) continue;
+                const tile = tiles.find((t) => t.x === neighbor.x && t.y === neighbor.y);
+                const terrain = formatTerrain(tile.terrain);
+                if (!isWalkable(terrain)) continue;
+
+                const tentativeG = (gScore[key(current.x, current.y)] || Infinity) + 1;
+                const neighborKey = key(neighbor.x, neighbor.y);
+
+                if (tentativeG < (gScore[neighborKey] || Infinity)) {
+                    cameFrom[neighborKey] = current;
+                    gScore[neighborKey] = tentativeG;
+                    fScore[neighborKey] = tentativeG + Math.abs(neighbor.x - end.x) + Math.abs(neighbor.y - end.y);
+                    if (!openSet.find(t => t.x === neighbor.x && t.y === neighbor.y)) {
+                        openSet.push({ x: neighbor.x, y: neighbor.y });
+                    }
+                }
+            }
+        }
+
+        return [];
+    };
 
     const renderGrid = () => {
         const grid = [];
@@ -101,7 +161,7 @@ const MapViewer = () => {
                 const effectiveTerrain = tile ? applyWeatherEffect(baseTerrain, tile.weather) : "Unknown";
                 const localHour = tile ? getLocalHour(timeOfDay, tile.x, width) : 12;
                 const brightness = getTileBrightness(localHour);
-                const tileClass = `tile ${effectiveTerrain} ${tile?.weather} ${tile?.oceanEvent ? "ocean" : ""}`;
+                const tileClass = `tile ${effectiveTerrain} ${tile?.weather} ${tile?.oceanEvent ? "ocean" : ""} ${path.some(p => p.x === x && p.y === y) ? "path" : ""}`;
                 const overlayIcon = terrainIcons[baseTerrain.toLowerCase()] || "";
 
                 row.push(
@@ -115,7 +175,22 @@ const MapViewer = () => {
                             filter: `brightness(${brightness})`,
                             position: "relative"
                         }}
-                        onClick={() => tile && setSelectedTile(tile)}
+                        onClick={() => {
+                            const clickedTile = tile;
+                            setSelectedTile(clickedTile); // ← EKLENDİ
+
+                            if (!startTile) setStartTile({ x, y });
+                            else if (!endTile) {
+                                setEndTile({ x, y });
+                                const foundPath = findPath(startTile, { x, y });
+                                setPath(foundPath);
+                            } else {
+                                setStartTile({ x, y });
+                                setEndTile(null);
+                                setPath([]);
+                            }
+                        }}
+
                     >
                         {content}
                         {overlayIcon && <span className="overlay-icon">{overlayIcon}</span>}
@@ -220,8 +295,8 @@ const MapViewer = () => {
                     <strong>Koordinat:</strong> ({selectedTile.x}, {selectedTile.y})<br />
                     <strong>Terrain:</strong> {selectedTile.terrain}<br />
                     <strong>Weather:</strong> {selectedTile.weather}<br />
-                    <strong>Global Time::</strong> {timeOfDay}:00 ({isNight ? "Night" : "Day"})<br />
-                    <strong>Local Time::</strong> {getLocalHour(timeOfDay, selectedTile.x, width)}:00<br />
+                    <strong>Global Time:</strong> {timeOfDay}:00 ({isNight ? "Night" : "Day"})<br />
+                    <strong>Local Time:</strong> {getLocalHour(timeOfDay, selectedTile.x, width)}:00<br />
                     {selectedTile.oceanEvent && (
                         <><strong>Ocean Event:</strong> {selectedTile.oceanEvent}</>
                     )}
