@@ -118,3 +118,58 @@ button {
     background-color: #1c1c2e;
     color: #ddd;
 }
+.tile.Rainy::after {
+    content: "";
+    position: absolute;
+    width: 2px;
+    height: 6px;
+    background: rgba(0,0,255,0.4);
+    animation: rain 0.5s infinite linear;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.tile.Snowy::after {
+    content: "❄️";
+    position: absolute;
+    animation: snow 1s infinite linear;
+    font-size: 12px;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+@keyframes rain {
+    0% {
+        top: 0;
+    }
+
+    100% {
+        top: 100%;
+    }
+}
+
+@keyframes snow {
+    0% {
+        top: 0;
+        opacity: 0.8;
+    }
+
+    100% {
+        top: 100%;
+        opacity: 0;
+    }
+}
+
+.tile {
+    position: relative;
+    overflow: hidden;
+}
+.overlay-icon {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    font-size: 10px;
+    opacity: 0.7;
+}

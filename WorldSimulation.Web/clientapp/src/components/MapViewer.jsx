@@ -5,7 +5,7 @@ const weatherSymbols = {
     Sunny: "🌞",
     Cloudy: "☁️",
     Rainy: "🌧",
-    Stormy: "🌩",
+    Stormy: "⚩️",
     Snowy: "❄️",
     Unknown: "❔"
 };
@@ -32,7 +32,6 @@ const formatTerrain = (terrain) => {
     }
 };
 
-// Zaman fazı (UI teması için)
 const getTimePhase = (hour) => {
     if (hour >= 5 && hour < 8) return "dawn";
     if (hour >= 8 && hour < 17) return "day";
@@ -40,10 +39,16 @@ const getTimePhase = (hour) => {
     return "night";
 };
 
-// Yerel saat (tile x konumuna göre)
 const getLocalHour = (globalHour, tileX, width) => {
     const offset = Math.floor((tileX / width) * 24);
     return (globalHour + offset) % 24;
+};
+
+const getTileBrightness = (hour) => {
+    if (hour >= 6 && hour <= 18) return 1;
+    if (hour === 5 || hour === 19) return 0.8;
+    if (hour === 4 || hour === 20) return 0.6;
+    return 0.4;
 };
 
 const MapViewer = () => {
@@ -53,15 +58,15 @@ const MapViewer = () => {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
     const [selectedTile, setSelectedTile] = useState(null);
-
     const [viewportX, setViewportX] = useState(0);
     const [viewportY, setViewportY] = useState(0);
-    const viewWidth = 15;
-    const viewHeight = 10;
-
     const [tileSize, setTileSize] = useState(32);
     const [timeOfDay, setTimeOfDay] = useState(12);
+    const [autoAdvance, setAutoAdvance] = useState(true);
+    const [forward, setForward] = useState(true);
 
+    const viewWidth = 15;
+    const viewHeight = 10;
     const isNight = timeOfDay < 6 || timeOfDay > 18;
 
     const getWeatherSymbol = (weather) => weatherSymbols[weather] || "❔";
@@ -74,15 +79,11 @@ const MapViewer = () => {
             const row = [];
             for (let x = viewportX; x < Math.min(viewportX + viewWidth, width); x++) {
                 const tile = tiles.find((t) => t?.x === x && t?.y === y);
-
-                const content = tile
-                    ? tile.oceanEvent
-                        ? getOceanSymbol(tile.oceanEvent)
-                        : getWeatherSymbol(tile.weather)
-                    : "";
-
+                const content = tile ? (tile.oceanEvent ? getOceanSymbol(tile.oceanEvent) : getWeatherSymbol(tile.weather)) : "";
                 const terrainClass = tile ? formatTerrain(tile.terrain) : "Unknown";
-                const tileClass = `tile ${terrainClass} ${tile?.oceanEvent ? "ocean" : ""} ${isNight ? "tile-night" : ""}`;
+                const localHour = tile ? getLocalHour(timeOfDay, tile.x, width) : 12;
+                const brightness = getTileBrightness(localHour);
+                const tileClass = `tile ${terrainClass} ${tile?.weather} ${tile?.oceanEvent ? "ocean" : ""}`;
 
                 row.push(
                     <div
@@ -91,7 +92,8 @@ const MapViewer = () => {
                         style={{
                             width: tileSize,
                             height: tileSize,
-                            fontSize: tileSize * 0.75
+                            fontSize: tileSize * 0.75,
+                            filter: `brightness(${brightness})`
                         }}
                         onClick={() => tile && setSelectedTile(tile)}
                     >
@@ -99,16 +101,20 @@ const MapViewer = () => {
                     </div>
                 );
             }
-
-            grid.push(
-                <div key={y} className="row">
-                    {row}
-                </div>
-            );
+            grid.push(<div key={y} className="row">{row}</div>);
         }
 
         return grid;
     };
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (autoAdvance) {
+                setTimeOfDay((prev) => forward ? (prev + 1) % 24 : (prev - 1 + 24) % 24);
+            }
+        }, 5000);
+        return () => clearInterval(interval);
+    }, [autoAdvance, forward]);
 
     const loadSnapshot = () => {
         setLoading(true);
@@ -160,7 +166,6 @@ const MapViewer = () => {
             if (e.key === "+") setTileSize((size) => Math.min(size + 4, 64));
             if (e.key === "-") setTileSize((size) => Math.max(size - 4, 16));
         };
-
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [width, height]);
@@ -171,7 +176,6 @@ const MapViewer = () => {
             {error && <p style={{ color: "red" }}>Hata: {error}</p>}
             {!loading && !error && tiles.length > 0 && renderGrid()}
 
-            {/* Saat kontrolü */}
             <div style={{ marginTop: "10px" }}>
                 <label htmlFor="timeSlider"><strong>Saat:</strong> {timeOfDay}:00</label><br />
                 <input
@@ -182,9 +186,14 @@ const MapViewer = () => {
                     value={timeOfDay}
                     onChange={(e) => setTimeOfDay(parseInt(e.target.value))}
                 />
+                <button onClick={() => setAutoAdvance(!autoAdvance)}>
+                    {autoAdvance ? "Durdur" : "Zamanı Başlat"}
+                </button>
+                <button onClick={() => setForward(!forward)}>
+                    {forward ? "⏩" : "⏪"}
+                </button>
             </div>
 
-            {/* Seçilen tile detayları */}
             {selectedTile && (
                 <div style={{ marginTop: "15px", padding: "8px", border: "1px solid #ccc", borderRadius: "5px", backgroundColor: "#fafafa" }}>
                     <strong>Koordinat:</strong> ({selectedTile.x}, {selectedTile.y})<br />
@@ -198,18 +207,9 @@ const MapViewer = () => {
                 </div>
             )}
 
-            {/* Mini Map */}
-            <div
-                className="minimap"
-                style={{ gridTemplateColumns: `repeat(${width}, 4px)` }}
-            >
+            <div className="minimap" style={{ gridTemplateColumns: `repeat(${width}, 4px)` }}>
                 {tiles.map((tile, index) => {
-                    const isInViewport =
-                        tile.x >= viewportX &&
-                        tile.x < viewportX + viewWidth &&
-                        tile.y >= viewportY &&
-                        tile.y < viewportY + viewHeight;
-
+                    const isInViewport = tile.x >= viewportX && tile.x < viewportX + viewWidth && tile.y >= viewportY && tile.y < viewportY + viewHeight;
                     return (
                         <div
                             key={index}
