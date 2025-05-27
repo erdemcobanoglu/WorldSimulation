@@ -32,6 +32,20 @@ const formatTerrain = (terrain) => {
     }
 };
 
+// Zaman fazı (UI teması için)
+const getTimePhase = (hour) => {
+    if (hour >= 5 && hour < 8) return "dawn";
+    if (hour >= 8 && hour < 17) return "day";
+    if (hour >= 17 && hour < 20) return "dusk";
+    return "night";
+};
+
+// Yerel saat (tile x konumuna göre)
+const getLocalHour = (globalHour, tileX, width) => {
+    const offset = Math.floor((tileX / width) * 24);
+    return (globalHour + offset) % 24;
+};
+
 const MapViewer = () => {
     const [tiles, setTiles] = useState([]);
     const [width, setWidth] = useState(0);
@@ -46,7 +60,8 @@ const MapViewer = () => {
     const viewHeight = 10;
 
     const [tileSize, setTileSize] = useState(32);
-    const [timeOfDay, setTimeOfDay] = useState(12); // 0 - 23
+    const [timeOfDay, setTimeOfDay] = useState(12);
+
     const isNight = timeOfDay < 6 || timeOfDay > 18;
 
     const getWeatherSymbol = (weather) => weatherSymbols[weather] || "❔";
@@ -150,25 +165,33 @@ const MapViewer = () => {
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [width, height]);
 
-    useEffect(() => {
-        const timeInterval = setInterval(() => {
-            setTimeOfDay((prev) => (prev + 1) % 24);
-        }, 5000); // 5 saniyede 1 saat geçsin
-        return () => clearInterval(timeInterval);
-    }, []);
-
     return (
-        <div className="map">
+        <div className={`map ${getTimePhase(timeOfDay)}`}>
             {loading && <p>Yükleniyor...</p>}
             {error && <p style={{ color: "red" }}>Hata: {error}</p>}
             {!loading && !error && tiles.length > 0 && renderGrid()}
 
+            {/* Saat kontrolü */}
+            <div style={{ marginTop: "10px" }}>
+                <label htmlFor="timeSlider"><strong>Saat:</strong> {timeOfDay}:00</label><br />
+                <input
+                    id="timeSlider"
+                    type="range"
+                    min="0"
+                    max="23"
+                    value={timeOfDay}
+                    onChange={(e) => setTimeOfDay(parseInt(e.target.value))}
+                />
+            </div>
+
+            {/* Seçilen tile detayları */}
             {selectedTile && (
                 <div style={{ marginTop: "15px", padding: "8px", border: "1px solid #ccc", borderRadius: "5px", backgroundColor: "#fafafa" }}>
                     <strong>Koordinat:</strong> ({selectedTile.x}, {selectedTile.y})<br />
                     <strong>Terrain:</strong> {selectedTile.terrain}<br />
                     <strong>Weather:</strong> {selectedTile.weather}<br />
-                    <strong>Time:</strong> {timeOfDay}:00 ({isNight ? "Night" : "Day"})<br />
+                    <strong>Küresel Saat:</strong> {timeOfDay}:00 ({isNight ? "Night" : "Day"})<br />
+                    <strong>Yerel Saat:</strong> {getLocalHour(timeOfDay, selectedTile.x, width)}:00<br />
                     {selectedTile.oceanEvent && (
                         <><strong>Ocean Event:</strong> {selectedTile.oceanEvent}</>
                     )}
@@ -178,9 +201,7 @@ const MapViewer = () => {
             {/* Mini Map */}
             <div
                 className="minimap"
-                style={{
-                    gridTemplateColumns: `repeat(${width}, 4px)`
-                }}
+                style={{ gridTemplateColumns: `repeat(${width}, 4px)` }}
             >
                 {tiles.map((tile, index) => {
                     const isInViewport =

@@ -102,3 +102,19 @@ button {
 .tile-night {
     filter: brightness(0.6);
 }
+.map.dawn {
+    background-color: #fbeec1;
+}
+
+.map.day {
+    background-color: #e6f7ff;
+}
+
+.map.dusk {
+    background-color: #ffd59e;
+}
+
+.map.night {
+    background-color: #1c1c2e;
+    color: #ddd;
+}
