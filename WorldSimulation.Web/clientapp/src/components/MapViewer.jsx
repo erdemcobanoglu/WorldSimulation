@@ -45,6 +45,9 @@ const MapViewer = () => {
     const viewWidth = 15;
     const viewHeight = 10;
 
+    const [isNight, setIsNight] = useState(false);
+    const [tileSize, setTileSize] = useState(32);
+
     const getWeatherSymbol = (weather) => weatherSymbols[weather] || "❔";
     const getOceanSymbol = (event) => oceanEventSymbols[event] || "⚠️";
 
@@ -60,15 +63,20 @@ const MapViewer = () => {
                     ? tile.oceanEvent
                         ? getOceanSymbol(tile.oceanEvent)
                         : getWeatherSymbol(tile.weather)
-                    : ""; // ❌ yerine boş göster
+                    : "";
 
                 const terrainClass = tile ? formatTerrain(tile.terrain) : "Unknown";
-                const tileClass = `tile ${terrainClass} ${tile?.oceanEvent ? "ocean" : ""}`;
+                const tileClass = `tile ${terrainClass} ${tile?.oceanEvent ? "ocean" : ""} ${isNight ? "tile-night" : ""}`;
 
                 row.push(
                     <div
                         key={`${x}-${y}`}
                         className={tileClass}
+                        style={{
+                            width: tileSize,
+                            height: tileSize,
+                            fontSize: tileSize * 0.75
+                        }}
                         onClick={() => tile && setSelectedTile(tile)}
                     >
                         {content}
@@ -99,11 +107,8 @@ const MapViewer = () => {
                 setTiles(data.tiles);
                 setWidth(maxX + 1);
                 setHeight(maxY + 1);
-
-                // viewport taşmasın
                 setViewportX((prev) => Math.min(prev, maxX + 1 - viewWidth));
                 setViewportY((prev) => Math.min(prev, maxY + 1 - viewHeight));
-
                 setError(null);
             })
             .catch((err) => {
@@ -130,18 +135,26 @@ const MapViewer = () => {
             });
     }, []);
 
-    // WASD kontrolü (viewport sınırları içinde tut)
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (e.key === "w") setViewportY((y) => Math.max(0, y - 1));
             if (e.key === "s") setViewportY((y) => Math.min(height - viewHeight, y + 1));
             if (e.key === "a") setViewportX((x) => Math.max(0, x - 1));
             if (e.key === "d") setViewportX((x) => Math.min(width - viewWidth, x + 1));
+            if (e.key === "+") setTileSize((size) => Math.min(size + 4, 64));
+            if (e.key === "-") setTileSize((size) => Math.max(size - 4, 16));
         };
 
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [width, height]);
+
+    useEffect(() => {
+        const dayNightInterval = setInterval(() => {
+            setIsNight((prev) => !prev);
+        }, 15000);
+        return () => clearInterval(dayNightInterval);
+    }, []);
 
     return (
         <div className="map">
@@ -154,11 +167,31 @@ const MapViewer = () => {
                     <strong>Koordinat:</strong> ({selectedTile.x}, {selectedTile.y})<br />
                     <strong>Terrain:</strong> {selectedTile.terrain}<br />
                     <strong>Weather:</strong> {selectedTile.weather}<br />
+                    <strong>Time:</strong> {isNight ? "Night" : "Day"}<br />
                     {selectedTile.oceanEvent && (
                         <><strong>Ocean Event:</strong> {selectedTile.oceanEvent}</>
                     )}
                 </div>
             )}
+
+            {/* Mini Map */}
+            <div className="minimap">
+                {tiles.map((tile, index) => {
+                    const isInViewport =
+                        tile.x >= viewportX &&
+                        tile.x < viewportX + viewWidth &&
+                        tile.y >= viewportY &&
+                        tile.y < viewportY + viewHeight;
+
+                    return (
+                        <div
+                            key={index}
+                            className={`minitile ${isInViewport ? "viewport-tile" : ""}`}
+                            title={`(${tile.x}, ${tile.y}) ${tile.terrain}`}
+                        />
+                    );
+                })}
+            </div>
         </div>
     );
 };

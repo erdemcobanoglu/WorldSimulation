@@ -78,3 +78,27 @@ button {
     background-color: #3cb371; /* yeşilimsi ada */
     color: white;
 }
+.minimap {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 4px);
+    width: fit-content;
+    max-width: 200px;
+    margin-top: 15px;
+    gap: 1px;
+    background: #eee;
+    padding: 4px;
+    border: 1px solid #999;
+}
+
+.minitile {
+    width: 4px;
+    height: 4px;
+    background-color: #bbb;
+}
+
+.viewport-tile {
+    background-color: red !important;
+}
+.tile-night {
+    filter: brightness(0.6);
+}
