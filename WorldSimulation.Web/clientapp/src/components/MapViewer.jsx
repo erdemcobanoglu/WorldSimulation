@@ -45,8 +45,9 @@ const MapViewer = () => {
     const viewWidth = 15;
     const viewHeight = 10;
 
-    const [isNight, setIsNight] = useState(false);
     const [tileSize, setTileSize] = useState(32);
+    const [timeOfDay, setTimeOfDay] = useState(12); // 0 - 23
+    const isNight = timeOfDay < 6 || timeOfDay > 18;
 
     const getWeatherSymbol = (weather) => weatherSymbols[weather] || "❔";
     const getOceanSymbol = (event) => oceanEventSymbols[event] || "⚠️";
@@ -150,10 +151,10 @@ const MapViewer = () => {
     }, [width, height]);
 
     useEffect(() => {
-        const dayNightInterval = setInterval(() => {
-            setIsNight((prev) => !prev);
-        }, 15000);
-        return () => clearInterval(dayNightInterval);
+        const timeInterval = setInterval(() => {
+            setTimeOfDay((prev) => (prev + 1) % 24);
+        }, 5000); // 5 saniyede 1 saat geçsin
+        return () => clearInterval(timeInterval);
     }, []);
 
     return (
@@ -167,7 +168,7 @@ const MapViewer = () => {
                     <strong>Koordinat:</strong> ({selectedTile.x}, {selectedTile.y})<br />
                     <strong>Terrain:</strong> {selectedTile.terrain}<br />
                     <strong>Weather:</strong> {selectedTile.weather}<br />
-                    <strong>Time:</strong> {isNight ? "Night" : "Day"}<br />
+                    <strong>Time:</strong> {timeOfDay}:00 ({isNight ? "Night" : "Day"})<br />
                     {selectedTile.oceanEvent && (
                         <><strong>Ocean Event:</strong> {selectedTile.oceanEvent}</>
                     )}
@@ -175,7 +176,12 @@ const MapViewer = () => {
             )}
 
             {/* Mini Map */}
-            <div className="minimap">
+            <div
+                className="minimap"
+                style={{
+                    gridTemplateColumns: `repeat(${width}, 4px)`
+                }}
+            >
                 {tiles.map((tile, index) => {
                     const isInViewport =
                         tile.x >= viewportX &&
@@ -188,6 +194,10 @@ const MapViewer = () => {
                             key={index}
                             className={`minitile ${isInViewport ? "viewport-tile" : ""}`}
                             title={`(${tile.x}, ${tile.y}) ${tile.terrain}`}
+                            onClick={() => {
+                                setViewportX(Math.max(0, Math.min(tile.x - Math.floor(viewWidth / 2), width - viewWidth)));
+                                setViewportY(Math.max(0, Math.min(tile.y - Math.floor(viewHeight / 2), height - viewHeight)));
+                            }}
                         />
                     );
                 })}
