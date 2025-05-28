@@ -68,6 +68,8 @@ const getTileBrightness = (hour) => {
     return 0.4;
 };
 
+const wrapX = (x, width) => ((x % width) + width) % width;
+
 const MapViewer = () => {
     const [tiles, setTiles] = useState([]);
     const [width, setWidth] = useState(0);
@@ -99,7 +101,6 @@ const MapViewer = () => {
         const cameFrom = {};
         const gScore = {};
         const fScore = {};
-
         const key = (x, y) => `${x},${y}`;
 
         gScore[key(start.x, start.y)] = 0;
@@ -127,20 +128,22 @@ const MapViewer = () => {
             ];
 
             for (const neighbor of neighbors) {
-                if (neighbor.x < 0 || neighbor.x >= width || neighbor.y < 0 || neighbor.y >= height) continue;
-                const tile = tiles.find((t) => t.x === neighbor.x && t.y === neighbor.y);
+                const wrappedX = wrapX(neighbor.x, width);
+                if (neighbor.y < 0 || neighbor.y >= height) continue;
+                const tile = tiles.find((t) => t.x === wrappedX && t.y === neighbor.y);
+                if (!tile) continue;
                 const terrain = formatTerrain(tile.terrain);
                 if (!isWalkable(terrain)) continue;
 
                 const tentativeG = (gScore[key(current.x, current.y)] || Infinity) + 1;
-                const neighborKey = key(neighbor.x, neighbor.y);
+                const neighborKey = key(wrappedX, neighbor.y);
 
                 if (tentativeG < (gScore[neighborKey] || Infinity)) {
                     cameFrom[neighborKey] = current;
                     gScore[neighborKey] = tentativeG;
-                    fScore[neighborKey] = tentativeG + Math.abs(neighbor.x - end.x) + Math.abs(neighbor.y - end.y);
-                    if (!openSet.find(t => t.x === neighbor.x && t.y === neighbor.y)) {
-                        openSet.push({ x: neighbor.x, y: neighbor.y });
+                    fScore[neighborKey] = tentativeG + Math.abs(wrappedX - end.x) + Math.abs(neighbor.y - end.y);
+                    if (!openSet.find(t => t.x === wrappedX && t.y === neighbor.y)) {
+                        openSet.push({ x: wrappedX, y: neighbor.y });
                     }
                 }
             }
@@ -152,21 +155,22 @@ const MapViewer = () => {
     const renderGrid = () => {
         const grid = [];
 
-        for (let y = viewportY; y < Math.min(viewportY + viewHeight, height); y++) {
+        for (let y = viewportY; y < viewportY + viewHeight; y++) {
             const row = [];
-            for (let x = viewportX; x < Math.min(viewportX + viewWidth, width); x++) {
-                const tile = tiles.find((t) => t?.x === x && t?.y === y);
+            for (let x = viewportX; x < viewportX + viewWidth; x++) {
+                const wrappedX = wrapX(x, width);
+                const tile = tiles.find((t) => t?.x === wrappedX && t?.y === y);
                 const content = tile ? (tile.oceanEvent ? getOceanSymbol(tile.oceanEvent) : getWeatherSymbol(tile.weather)) : "";
                 const baseTerrain = tile ? formatTerrain(tile.terrain) : "Unknown";
                 const effectiveTerrain = tile ? applyWeatherEffect(baseTerrain, tile.weather) : "Unknown";
                 const localHour = tile ? getLocalHour(timeOfDay, tile.x, width) : 12;
                 const brightness = getTileBrightness(localHour);
-                const tileClass = `tile ${effectiveTerrain} ${tile?.weather} ${tile?.oceanEvent ? "ocean" : ""} ${path.some(p => p.x === x && p.y === y) ? "path" : ""}`;
+                const tileClass = `tile ${effectiveTerrain} ${tile?.weather} ${tile?.oceanEvent ? "ocean" : ""} ${path.some(p => p.x === wrappedX && p.y === y) ? "path" : ""}`;
                 const overlayIcon = terrainIcons[baseTerrain.toLowerCase()] || "";
 
                 row.push(
                     <div
-                        key={`${x}-${y}`}
+                        key={`${wrappedX}-${y}`}
                         className={tileClass}
                         style={{
                             width: tileSize,
@@ -177,20 +181,19 @@ const MapViewer = () => {
                         }}
                         onClick={() => {
                             const clickedTile = tile;
-                            setSelectedTile(clickedTile); // ← EKLENDİ
+                            setSelectedTile(clickedTile);
 
-                            if (!startTile) setStartTile({ x, y });
+                            if (!startTile) setStartTile({ x: wrappedX, y });
                             else if (!endTile) {
-                                setEndTile({ x, y });
-                                const foundPath = findPath(startTile, { x, y });
+                                setEndTile({ x: wrappedX, y });
+                                const foundPath = findPath(startTile, { x: wrappedX, y });
                                 setPath(foundPath);
                             } else {
-                                setStartTile({ x, y });
+                                setStartTile({ x: wrappedX, y });
                                 setEndTile(null);
                                 setPath([]);
                             }
                         }}
-
                     >
                         {content}
                         {overlayIcon && <span className="overlay-icon">{overlayIcon}</span>}
