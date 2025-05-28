@@ -154,19 +154,20 @@ const MapViewer = () => {
 
     const renderGrid = () => {
         const grid = [];
-
         for (let y = viewportY; y < viewportY + viewHeight; y++) {
             const row = [];
             for (let x = viewportX; x < viewportX + viewWidth; x++) {
                 const wrappedX = wrapX(x, width);
-                const tile = tiles.find((t) => t?.x === wrappedX && t?.y === y);
+                const tile = tiles.find(t => t?.x === wrappedX && t?.y === y);
                 const content = tile ? (tile.oceanEvent ? getOceanSymbol(tile.oceanEvent) : getWeatherSymbol(tile.weather)) : "";
                 const baseTerrain = tile ? formatTerrain(tile.terrain) : "Unknown";
                 const effectiveTerrain = tile ? applyWeatherEffect(baseTerrain, tile.weather) : "Unknown";
                 const localHour = tile ? getLocalHour(timeOfDay, tile.x, width) : 12;
                 const brightness = getTileBrightness(localHour);
-                const tileClass = `tile ${effectiveTerrain} ${tile?.weather} ${tile?.oceanEvent ? "ocean" : ""} ${path.some(p => p.x === wrappedX && p.y === y) ? "path" : ""} ${!tile ? "loading" : ""}`; 
+                const tileClass = `tile ${effectiveTerrain} ${tile?.weather} ${tile?.oceanEvent ? "ocean" : ""}`;
                 const overlayIcon = terrainIcons[baseTerrain.toLowerCase()] || "";
+                const isPlayerHere = playerPos.x === wrappedX && playerPos.y === y;
+                const isRelicHere = isRelicAt(wrappedX, y);
 
                 row.push(
                     <div
@@ -180,31 +181,22 @@ const MapViewer = () => {
                             position: "relative"
                         }}
                         onClick={() => {
-                            const clickedTile = tile;
-                            setSelectedTile(clickedTile);
-
-                            if (!startTile) setStartTile({ x: wrappedX, y });
-                            else if (!endTile) {
-                                setEndTile({ x: wrappedX, y });
-                                const foundPath = findPath(startTile, { x: wrappedX, y });
-                                setPath(foundPath);
-                            } else {
-                                setStartTile({ x: wrappedX, y });
-                                setEndTile(null);
-                                setPath([]);
-                            }
+                            setPlayerPos({ x: wrappedX, y });
+                            setSelectedTile(tile);
                         }}
                     >
                         {content}
                         {overlayIcon && <span className="overlay-icon">{overlayIcon}</span>}
+                        {isPlayerHere && <span className="player-icon">🧍‍♂️</span>}
+                        {isRelicHere && <span className="relic-icon">💎</span>}
                     </div>
                 );
             }
             grid.push(<div key={y} className="row">{row}</div>);
         }
-
         return grid;
     };
+
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -215,24 +207,45 @@ const MapViewer = () => {
         return () => clearInterval(interval);
     }, [autoAdvance, forward]);
 
+
+    // Relic noktalarını oluşturmak için başlangıçta belirli tile'ları seç
+    const generateRelics = (tiles, count = 3) => {
+        const landTiles = tiles.filter(t => ["land", "island"].includes(t.terrain?.toLowerCase()));
+        const selected = [];
+        while (selected.length < count && landTiles.length > 0) {
+            const index = Math.floor(Math.random() * landTiles.length);
+            selected.push(landTiles.splice(index, 1)[0]);
+        }
+        return selected.map(tile => ({ x: tile.x, y: tile.y }));
+    };
+
+    // Relic state
+    const [relics, setRelics] = useState([]); 
+    // Oyuncu konumu (şimdilik sabit veya tıklamayla değiştirilebilir)
+    const [playerPos, setPlayerPos] = useState({ x: 0, y: 0 }); 
+    // Relic kontrolü
+    const isRelicAt = (x, y) => relics.some(r => r.x === x && r.y === y);
+
+    // Snapshot yükleme sonrası relic'leri oluştur
     const loadSnapshot = () => {
         setLoading(true);
         fetch("https://localhost:7260/api/map/weather-snapshot")
-            .then((res) => {
+            .then(res => {
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 return res.json();
             })
-            .then((data) => {
-                const maxX = Math.max(...data.tiles.map((t) => t.x));
-                const maxY = Math.max(...data.tiles.map((t) => t.y));
+            .then(data => {
+                const maxX = Math.max(...data.tiles.map(t => t.x));
+                const maxY = Math.max(...data.tiles.map(t => t.y));
                 setTiles(data.tiles);
                 setWidth(maxX + 1);
                 setHeight(maxY + 1);
-                setViewportX((prev) => Math.min(prev, maxX + 1 - viewWidth));
-                setViewportY((prev) => Math.min(prev, maxY + 1 - viewHeight));
+                setViewportX(Math.min(viewportX, maxX + 1 - viewWidth));
+                setViewportY(Math.min(viewportY, maxY + 1 - viewHeight));
+                setRelics(generateRelics(data.tiles));
                 setError(null);
             })
-            .catch((err) => {
+            .catch(err => {
                 console.error("Snapshot hatası:", err);
                 setError(err.message);
             })
