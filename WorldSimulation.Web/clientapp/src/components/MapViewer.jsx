@@ -290,8 +290,13 @@ const MapViewer = () => {
 
                 <div style={{ minHeight: "500px", width: "100%", transition: "opacity 0.5s ease-in" }}>
                     {tiles.length === 0 && !loading && (
-                        <p style={{ color: "#aaa", padding: "20px" }}>Harita yükleniyor...</p>
+                        <div className="loading-animation">
+                            {"Harita yükleniyor...".split("").map((char, index) => (
+                                <span key={index} className="dot">{char}</span>
+                            ))}
+                        </div>
                     )}
+
                     {!loading && !error && tiles.length > 0 && (
                         <div style={{ opacity: tiles.length > 0 ? 1 : 0, transition: "opacity 0.5s ease-in" }}>
                             {renderGrid()}
