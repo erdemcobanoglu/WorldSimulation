@@ -280,8 +280,8 @@ const MapViewer = () => {
             {error && <p style={{ color: "red" }}>Hata: {error}</p>}
             {!loading && !error && tiles.length > 0 && renderGrid()}
 
-            <div style={{ marginTop: "10px" }}>
-                <label htmlFor="timeSlider"><strong>Saat:</strong> {timeOfDay}:00</label><br />
+            <div style={{ marginTop: "20px", padding: "10px", backgroundColor: "#1e1e2f", borderRadius: "10px", boxShadow: "0 0 10px #00000033", color: "#ffffff", minWidth: "300px" }}>
+                <label htmlFor="timeSlider" style={{ fontWeight: "bold", fontSize: "1.1em" }}>🕒 Saat: <span style={{ fontFamily: "monospace" }}>{timeOfDay}:00</span></label>
                 <input
                     id="timeSlider"
                     type="range"
@@ -289,27 +289,39 @@ const MapViewer = () => {
                     max="23"
                     value={timeOfDay}
                     onChange={(e) => setTimeOfDay(parseInt(e.target.value))}
+                    style={{ width: "100%", marginTop: "8px", marginBottom: "12px" }}
                 />
-                <button onClick={() => setAutoAdvance(!autoAdvance)}>
-                    {autoAdvance ? "Durdur" : "Zamanı Başlat"}
-                </button>
-                <button onClick={() => setForward(!forward)}>
-                    {forward ? "⏩" : "⏪"}
-                </button>
+
+                <div style={{ display: "flex", justifyContent: "space-between", gap: "8px", marginBottom: "15px" }}>
+                    <button onClick={() => setAutoAdvance(!autoAdvance)} style={{ padding: "6px 12px" }}>
+                        {autoAdvance ? "⏸️ Durdur" : "▶️ Başlat"}
+                    </button>
+                    <button onClick={() => setForward(!forward)} style={{ padding: "6px 12px" }}>
+                        {forward ? "⏩ İleri" : "⏪ Geri"}
+                    </button>
+                </div>
+
+                {selectedTile && (
+                    <div style={{
+                        backgroundColor: "#2e2e3e",
+                        padding: "12px",
+                        borderRadius: "8px",
+                        border: "1px solid #444",
+                        fontSize: "0.95em",
+                        lineHeight: "1.5em"
+                    }}>
+                        <div><strong>📍 Koordinat:</strong> ({selectedTile.x}, {selectedTile.y})</div>
+                        <div><strong>🗺 Terrain:</strong> {selectedTile.terrain}</div>
+                        <div><strong>🌦 Weather:</strong> {selectedTile.weather}</div>
+                        <div><strong>🕓 Global:</strong> {timeOfDay}:00 <span style={{ color: isNight ? "#87cefa" : "#ffd700" }}>({isNight ? "Night" : "Day"})</span></div>
+                        <div><strong>📍 Local:</strong> {getLocalHour(timeOfDay, selectedTile.x, width)}:00</div>
+                        {selectedTile.oceanEvent && (
+                            <div><strong>🌊 Ocean:</strong> {selectedTile.oceanEvent}</div>
+                        )}
+                    </div>
+                )}
             </div>
 
-            {selectedTile && (
-                <div style={{ marginTop: "15px", padding: "8px", border: "1px solid #ccc", borderRadius: "5px", backgroundColor: "#fafafa" }}>
-                    <strong>Koordinat:</strong> ({selectedTile.x}, {selectedTile.y})<br />
-                    <strong>Terrain:</strong> {selectedTile.terrain}<br />
-                    <strong>Weather:</strong> {selectedTile.weather}<br />
-                    <strong>Global Time:</strong> {timeOfDay}:00 ({isNight ? "Night" : "Day"})<br />
-                    <strong>Local Time:</strong> {getLocalHour(timeOfDay, selectedTile.x, width)}:00<br />
-                    {selectedTile.oceanEvent && (
-                        <><strong>Ocean Event:</strong> {selectedTile.oceanEvent}</>
-                    )}
-                </div>
-            )}
 
             <div className="minimap" style={{ gridTemplateColumns: `repeat(${width}, 4px)` }}>
                 {tiles.map((tile, index) => {
