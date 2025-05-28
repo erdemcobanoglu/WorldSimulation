@@ -272,15 +272,36 @@ const MapViewer = () => {
     return (
         <div className={`map ${getTimePhase(timeOfDay)}`} style={{
             display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center"
+            flexDirection: "row",
+            alignItems: "flex-start",
+            justifyContent: "center",
+            gap: "20px",
+            padding: "20px"
         }}>
-            {loading && <p>Yükleniyor...</p>}
-            {error && <p style={{ color: "red" }}>Hata: {error}</p>}
-            {!loading && !error && tiles.length > 0 && renderGrid()}
+            <div>
+                {loading && <p>Yükleniyor...</p>}
+                {error && <p style={{ color: "red" }}>Hata: {error}</p>}
+                {!loading && !error && tiles.length > 0 && renderGrid()}
 
-            <div style={{ marginTop: "20px", padding: "10px", backgroundColor: "#1e1e2f", borderRadius: "10px", boxShadow: "0 0 10px #00000033", color: "#ffffff", minWidth: "300px" }}>
+                <div className="minimap" style={{ gridTemplateColumns: `repeat(${width}, 4px)` }}>
+                    {tiles.map((tile, index) => {
+                        const isInViewport = tile.x >= viewportX && tile.x < viewportX + viewWidth && tile.y >= viewportY && tile.y < viewportY + viewHeight;
+                        return (
+                            <div
+                                key={index}
+                                className={`minitile ${isInViewport ? "viewport-tile" : ""}`}
+                                title={`(${tile.x}, ${tile.y}) ${tile.terrain}`}
+                                onClick={() => {
+                                    setViewportX(Math.max(0, Math.min(tile.x - Math.floor(viewWidth / 2), width - viewWidth)));
+                                    setViewportY(Math.max(0, Math.min(tile.y - Math.floor(viewHeight / 2), height - viewHeight)));
+                                }}
+                            />
+                        );
+                    })}
+                </div>
+            </div>
+
+            <div style={{ padding: "10px", backgroundColor: "#1e1e2f", borderRadius: "10px", boxShadow: "0 0 10px #00000033", color: "#ffffff", minWidth: "300px" }}>
                 <label htmlFor="timeSlider" style={{ fontWeight: "bold", fontSize: "1.1em" }}>🕒 Saat: <span style={{ fontFamily: "monospace" }}>{timeOfDay}:00</span></label>
                 <input
                     id="timeSlider"
@@ -320,24 +341,6 @@ const MapViewer = () => {
                         )}
                     </div>
                 )}
-            </div>
-
-
-            <div className="minimap" style={{ gridTemplateColumns: `repeat(${width}, 4px)` }}>
-                {tiles.map((tile, index) => {
-                    const isInViewport = tile.x >= viewportX && tile.x < viewportX + viewWidth && tile.y >= viewportY && tile.y < viewportY + viewHeight;
-                    return (
-                        <div
-                            key={index}
-                            className={`minitile ${isInViewport ? "viewport-tile" : ""}`}
-                            title={`(${tile.x}, ${tile.y}) ${tile.terrain}`}
-                            onClick={() => {
-                                setViewportX(Math.max(0, Math.min(tile.x - Math.floor(viewWidth / 2), width - viewWidth)));
-                                setViewportY(Math.max(0, Math.min(tile.y - Math.floor(viewHeight / 2), height - viewHeight)));
-                            }}
-                        />
-                    );
-                })}
             </div>
         </div>
     );
