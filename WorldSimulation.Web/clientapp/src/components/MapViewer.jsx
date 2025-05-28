@@ -275,10 +275,11 @@ const MapViewer = () => {
             flexDirection: "row",
             alignItems: "flex-start",
             justifyContent: "center",
+            flexWrap: "wrap",
             gap: "20px",
             padding: "20px"
         }}>
-            <div>
+            <div style={{ flex: "1 1 600px" }}>
                 {loading && <p>Yükleniyor...</p>}
                 {error && <p style={{ color: "red" }}>Hata: {error}</p>}
                 {!loading && !error && tiles.length > 0 && renderGrid()}
@@ -301,7 +302,18 @@ const MapViewer = () => {
                 </div>
             </div>
 
-            <div style={{ padding: "10px", backgroundColor: "#1e1e2f", borderRadius: "10px", boxShadow: "0 0 10px #00000033", color: "#ffffff", minWidth: "300px" }}>
+            <div style={{
+                padding: "10px",
+                backgroundColor: "#1e1e2f",
+                borderRadius: "10px",
+                boxShadow: "0 0 10px #00000033",
+                color: "#ffffff",
+                minWidth: "280px",
+                maxWidth: "360px",
+                flex: "1 1 300px",
+                position: "sticky",
+                top: "20px"
+            }}>
                 <label htmlFor="timeSlider" style={{ fontWeight: "bold", fontSize: "1.1em" }}>🕒 Saat: <span style={{ fontFamily: "monospace" }}>{timeOfDay}:00</span></label>
                 <input
                     id="timeSlider"
