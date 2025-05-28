@@ -85,7 +85,12 @@ const MapViewer = () => {
     const [forward, setForward] = useState(true);
     const [startTile, setStartTile] = useState(null);
     const [endTile, setEndTile] = useState(null);
-    const [path, setPath] = useState([]);
+    const [path, setPath] = useState([]); 
+    const [playerPos, setPlayerPos] = useState({ x: 0, y: 0 });
+    const [collectedRelics, setCollectedRelics] = useState(0); 
+    const [relics, setRelics] = useState([]);  
+    const isRelicAt = (x, y) => relics.some(r => r.x === x && r.y === y); 
+    const totalRelics = relics.length + collectedRelics;
 
     const viewWidth = 15;
     const viewHeight = 10;
@@ -183,6 +188,11 @@ const MapViewer = () => {
                         onClick={() => {
                             setPlayerPos({ x: wrappedX, y });
                             setSelectedTile(tile);
+                            const onRelic = relics.find(r => r.x === wrappedX && r.y === y);
+                            if (onRelic) {
+                                setRelics(prev => prev.filter(r => !(r.x === wrappedX && r.y === y)));
+                                setCollectedRelics(prev => prev + 1);
+                            }
                         }}
                     >
                         {content}
@@ -196,7 +206,6 @@ const MapViewer = () => {
         }
         return grid;
     };
-
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -219,12 +228,9 @@ const MapViewer = () => {
         return selected.map(tile => ({ x: tile.x, y: tile.y }));
     };
 
-    // Relic state
-    const [relics, setRelics] = useState([]); 
-    // Oyuncu konumu (şimdilik sabit veya tıklamayla değiştirilebilir)
-    const [playerPos, setPlayerPos] = useState({ x: 0, y: 0 }); 
-    // Relic kontrolü
-    const isRelicAt = (x, y) => relics.some(r => r.x === x && r.y === y);
+   
+    
+
 
     // Snapshot yükleme sonrası relic'leri oluştur
     const loadSnapshot = () => {
@@ -286,6 +292,7 @@ const MapViewer = () => {
 
 
     return (
+
         <div className={`map ${getTimePhase(timeOfDay)}`} style={{
             display: "flex",
             flexDirection: "row",
@@ -400,6 +407,9 @@ const MapViewer = () => {
                                 {selectedTile.oceanEvent && (
                                     <div><strong>🌊 Ocean:</strong> {selectedTile.oceanEvent}</div>
                                 )}
+                                <div>
+                                    <strong>💼 Collected Relic:</strong> {collectedRelics}/{totalRelics}
+                                </div>
                             </div>
                         )}
                     </div>
