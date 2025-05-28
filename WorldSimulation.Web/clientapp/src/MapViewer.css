@@ -21,6 +21,11 @@
     justify-content: center;
     border: 1px solid #ccc;
     background-color: #f0f0f0;
+    transition: opacity 0.3s ease-in;
+    opacity: 1;
+}
+.tile.loading {
+    opacity: 0;
 }
 
     /* Arazi türleri */
@@ -177,3 +182,10 @@ button {
     outline: 2px solid yellow;
     box-shadow: 0 0 6px 2px yellow;
 }
+html, body, #root {
+    height: 100%;
+    margin: 0;
+    background-color: #1e1e2f;
+}
+
+ 

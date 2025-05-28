@@ -165,7 +165,7 @@ const MapViewer = () => {
                 const effectiveTerrain = tile ? applyWeatherEffect(baseTerrain, tile.weather) : "Unknown";
                 const localHour = tile ? getLocalHour(timeOfDay, tile.x, width) : 12;
                 const brightness = getTileBrightness(localHour);
-                const tileClass = `tile ${effectiveTerrain} ${tile?.weather} ${tile?.oceanEvent ? "ocean" : ""} ${path.some(p => p.x === wrappedX && p.y === y) ? "path" : ""}`;
+                const tileClass = `tile ${effectiveTerrain} ${tile?.weather} ${tile?.oceanEvent ? "ocean" : ""} ${path.some(p => p.x === wrappedX && p.y === y) ? "path" : ""} ${!tile ? "loading" : ""}`; 
                 const overlayIcon = terrainIcons[baseTerrain.toLowerCase()] || "";
 
                 row.push(
@@ -279,12 +279,19 @@ const MapViewer = () => {
             justifyContent: "center",
             flexWrap: "wrap",
             gap: "20px",
-            padding: "20px"
+            padding: "20px",
+            minHeight: "100vh",
+            backgroundColor: "#1e1e2f"
         }}>
             <div style={{ flex: "1 1 600px" }}>
-                {loading && <p>Yükleniyor...</p>}
                 {error && <p style={{ color: "red" }}>Hata: {error}</p>}
-                {!loading && !error && tiles.length > 0 && renderGrid()}
+
+                <div style={{ minHeight: "500px", width: "100%" }}>
+                    {tiles.length === 0 && !loading && (
+                        <p style={{ color: "#aaa", padding: "20px" }}>Harita yükleniyor...</p>
+                    )}
+                    {!loading && !error && tiles.length > 0 && renderGrid()}
+                </div>
 
                 <div className="minimap" style={{ gridTemplateColumns: `repeat(${width}, 4px)` }}>
                     {tiles.map((tile, index) => {
