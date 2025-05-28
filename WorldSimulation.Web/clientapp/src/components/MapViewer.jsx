@@ -269,6 +269,8 @@ const MapViewer = () => {
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [width, height]);
 
+    const [panelOpen, setPanelOpen] = useState(true);
+
     return (
         <div className={`map ${getTimePhase(timeOfDay)}`} style={{
             display: "flex",
@@ -314,42 +316,58 @@ const MapViewer = () => {
                 position: "sticky",
                 top: "20px"
             }}>
-                <label htmlFor="timeSlider" style={{ fontWeight: "bold", fontSize: "1.1em" }}>🕒 Saat: <span style={{ fontFamily: "monospace" }}>{timeOfDay}:00</span></label>
-                <input
-                    id="timeSlider"
-                    type="range"
-                    min="0"
-                    max="23"
-                    value={timeOfDay}
-                    onChange={(e) => setTimeOfDay(parseInt(e.target.value))}
-                    style={{ width: "100%", marginTop: "8px", marginBottom: "12px" }}
-                />
+                <button onClick={() => setPanelOpen(!panelOpen)} style={{
+                    backgroundColor: "#444",
+                    color: "#fff",
+                    border: "none",
+                    padding: "6px 12px",
+                    borderRadius: "6px",
+                    marginBottom: "10px",
+                    cursor: "pointer"
+                }}>
+                    {panelOpen ? "▲ Paneli Gizle" : "▼ Paneli Göster"}
+                </button>
 
-                <div style={{ display: "flex", justifyContent: "space-between", gap: "8px", marginBottom: "15px" }}>
-                    <button onClick={() => setAutoAdvance(!autoAdvance)} style={{ padding: "6px 12px" }}>
-                        {autoAdvance ? "⏸️ Durdur" : "▶️ Başlat"}
-                    </button>
-                    <button onClick={() => setForward(!forward)} style={{ padding: "6px 12px" }}>
-                        {forward ? "⏩ İleri" : "⏪ Geri"}
-                    </button>
-                </div>
+                {panelOpen && (
+                    <div>
+                        <label htmlFor="timeSlider" style={{ fontWeight: "bold", fontSize: "1.1em" }}>🕒 Saat: <span style={{ fontFamily: "monospace" }}>{timeOfDay}:00</span></label>
+                        <input
+                            id="timeSlider"
+                            type="range"
+                            min="0"
+                            max="23"
+                            value={timeOfDay}
+                            onChange={(e) => setTimeOfDay(parseInt(e.target.value))}
+                            style={{ width: "100%", marginTop: "8px", marginBottom: "12px" }}
+                        />
 
-                {selectedTile && (
-                    <div style={{
-                        backgroundColor: "#2e2e3e",
-                        padding: "12px",
-                        borderRadius: "8px",
-                        border: "1px solid #444",
-                        fontSize: "0.95em",
-                        lineHeight: "1.5em"
-                    }}>
-                        <div><strong>📍 Koordinat:</strong> ({selectedTile.x}, {selectedTile.y})</div>
-                        <div><strong>🗺 Terrain:</strong> {selectedTile.terrain}</div>
-                        <div><strong>🌦 Weather:</strong> {selectedTile.weather}</div>
-                        <div><strong>🕓 Global:</strong> {timeOfDay}:00 <span style={{ color: isNight ? "#87cefa" : "#ffd700" }}>({isNight ? "Night" : "Day"})</span></div>
-                        <div><strong>📍 Local:</strong> {getLocalHour(timeOfDay, selectedTile.x, width)}:00</div>
-                        {selectedTile.oceanEvent && (
-                            <div><strong>🌊 Ocean:</strong> {selectedTile.oceanEvent}</div>
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: "8px", marginBottom: "15px" }}>
+                            <button onClick={() => setAutoAdvance(!autoAdvance)} style={{ padding: "6px 12px" }}>
+                                {autoAdvance ? "⏸️ Durdur" : "▶️ Başlat"}
+                            </button>
+                            <button onClick={() => setForward(!forward)} style={{ padding: "6px 12px" }}>
+                                {forward ? "⏩ İleri" : "⏪ Geri"}
+                            </button>
+                        </div>
+
+                        {selectedTile && (
+                            <div style={{
+                                backgroundColor: "#2e2e3e",
+                                padding: "12px",
+                                borderRadius: "8px",
+                                border: "1px solid #444",
+                                fontSize: "0.95em",
+                                lineHeight: "1.5em"
+                            }}>
+                                <div><strong>📍 Koordinat:</strong> ({selectedTile.x}, {selectedTile.y})</div>
+                                <div><strong>🗺 Terrain:</strong> {selectedTile.terrain}</div>
+                                <div><strong>🌦 Weather:</strong> {selectedTile.weather}</div>
+                                <div><strong>🕓 Global:</strong> {timeOfDay}:00 <span style={{ color: isNight ? "#87cefa" : "#ffd700" }}>({isNight ? "Night" : "Day"})</span></div>
+                                <div><strong>📍 Local:</strong> {getLocalHour(timeOfDay, selectedTile.x, width)}:00</div>
+                                {selectedTile.oceanEvent && (
+                                    <div><strong>🌊 Ocean:</strong> {selectedTile.oceanEvent}</div>
+                                )}
+                            </div>
                         )}
                     </div>
                 )}
