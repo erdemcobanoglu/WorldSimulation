@@ -271,6 +271,7 @@ const MapViewer = () => {
 
     const [panelOpen, setPanelOpen] = useState(true);
 
+
     return (
         <div className={`map ${getTimePhase(timeOfDay)}`} style={{
             display: "flex",
@@ -281,19 +282,24 @@ const MapViewer = () => {
             gap: "20px",
             padding: "20px",
             minHeight: "100vh",
-            backgroundColor: "#1e1e2f"
+            backgroundColor: "#1e1e2f",
+            transition: "opacity 0.5s ease-in"
         }}>
-            <div style={{ flex: "1 1 600px" }}>
+            <div style={{ flex: "1 1 600px", transition: "opacity 0.5s ease-in" }}>
                 {error && <p style={{ color: "red" }}>Hata: {error}</p>}
 
-                <div style={{ minHeight: "500px", width: "100%" }}>
+                <div style={{ minHeight: "500px", width: "100%", transition: "opacity 0.5s ease-in" }}>
                     {tiles.length === 0 && !loading && (
                         <p style={{ color: "#aaa", padding: "20px" }}>Harita yükleniyor...</p>
                     )}
-                    {!loading && !error && tiles.length > 0 && renderGrid()}
+                    {!loading && !error && tiles.length > 0 && (
+                        <div style={{ opacity: tiles.length > 0 ? 1 : 0, transition: "opacity 0.5s ease-in" }}>
+                            {renderGrid()}
+                        </div>
+                    )}
                 </div>
 
-                <div className="minimap" style={{ gridTemplateColumns: `repeat(${width}, 4px)` }}>
+                <div className="minimap" style={{ gridTemplateColumns: `repeat(${width}, 4px)`, transition: "opacity 0.5s ease-in" }}>
                     {tiles.map((tile, index) => {
                         const isInViewport = tile.x >= viewportX && tile.x < viewportX + viewWidth && tile.y >= viewportY && tile.y < viewportY + viewHeight;
                         return (
@@ -321,7 +327,8 @@ const MapViewer = () => {
                 maxWidth: "360px",
                 flex: "1 1 300px",
                 position: "sticky",
-                top: "20px"
+                top: "20px",
+                transition: "opacity 0.5s ease-in"
             }}>
                 <button onClick={() => setPanelOpen(!panelOpen)} style={{
                     backgroundColor: "#444",
@@ -364,7 +371,8 @@ const MapViewer = () => {
                                 borderRadius: "8px",
                                 border: "1px solid #444",
                                 fontSize: "0.95em",
-                                lineHeight: "1.5em"
+                                lineHeight: "1.5em",
+                                transition: "opacity 0.5s ease-in"
                             }}>
                                 <div><strong>📍 Koordinat:</strong> ({selectedTile.x}, {selectedTile.y})</div>
                                 <div><strong>🗺 Terrain:</strong> {selectedTile.terrain}</div>
@@ -381,6 +389,8 @@ const MapViewer = () => {
             </div>
         </div>
     );
+
+
 };
 
 export default MapViewer;
