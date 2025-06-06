@@ -226,7 +226,7 @@ const MapViewer = () => {
             if (autoAdvance) {
                 setTimeOfDay((prev) => forward ? (prev + 1) % 24 : (prev - 1 + 24) % 24);
             }
-        }, 5000);
+        }, 15000);
         return () => clearInterval(interval);
     }, [autoAdvance, forward]);
 
@@ -264,8 +264,10 @@ const MapViewer = () => {
                 setError(null);
 
                 // 🔁 Oyuncunun konumuna göre ortalama
-                setViewportX(Math.max(0, Math.min(playerPos.x - Math.floor(viewWidth / 2), maxX + 1 - viewWidth)));
-                setViewportY(Math.max(0, Math.min(playerPos.y - Math.floor(viewHeight / 2), maxY + 1 - viewHeight)));
+                setViewportX(Math.max(0, Math.min(playerPos.x - Math.floor(viewWidth / 2), width - viewWidth + 1)));
+                setViewportY(Math.max(0, Math.min(playerPos.y - Math.floor(viewHeight / 2), height - viewHeight + 1)));
+
+
             })
             .catch(err => {
                 console.error("Snapshot hatası:", err);
@@ -325,8 +327,9 @@ const MapViewer = () => {
                 setCollectedRelics(prev => prev + 1);
             }
 
-            const newViewportX = Math.max(0, Math.min(wrappedX - Math.floor(viewWidth / 2), width - viewWidth));
-            const newViewportY = Math.max(0, Math.min(newY - Math.floor(viewHeight / 2), height - viewHeight));
+            const newViewportX = Math.max(0, Math.min(wrappedX - Math.floor(viewWidth / 2), width - viewWidth + 1));
+            const newViewportY = Math.max(0, Math.min(newY - Math.floor(viewHeight / 2), height - viewHeight + 1));
+
             setViewportX(newViewportX);
             setViewportY(newViewportY);
         };
