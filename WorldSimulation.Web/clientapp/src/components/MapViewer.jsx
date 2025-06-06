@@ -277,16 +277,45 @@ const MapViewer = () => {
 
     useEffect(() => {
         const handleKeyDown = (e) => {
-            if (e.key === "w") setViewportY((y) => Math.max(0, y - 1));
-            if (e.key === "s") setViewportY((y) => Math.min(height - viewHeight, y + 1));
-            if (e.key === "a") setViewportX((x) => Math.max(0, x - 1));
-            if (e.key === "d") setViewportX((x) => Math.min(width - viewWidth, x + 1));
-            if (e.key === "+") setTileSize((size) => Math.min(size + 4, 80));
-            if (e.key === "-") setTileSize((size) => Math.max(size - 4, 24)); 
+            let newX = playerPos.x;
+            let newY = playerPos.y;
+
+            if (e.key === "ArrowUp") newY--;
+            if (e.key === "ArrowDown") newY++;
+            if (e.key === "ArrowLeft") newX--;
+            if (e.key === "ArrowRight") newX++;
+
+            const wrappedX = wrapX(newX, width);
+            if (newY < 0 || newY >= height) return;
+
+            const tile = tiles.find(t => t.x === wrappedX && t.y === newY);
+            if (!tile) return;
+
+            const terrain = formatTerrain(tile.terrain);
+            const effectiveTerrain = applyWeatherEffect(terrain, tile.weather);
+
+            if (!isWalkable(effectiveTerrain)) return;
+
+            setPlayerPos({ x: wrappedX, y: newY });
+            setSelectedTile(tile);
+
+            const onRelic = relics.find(r => r.x === wrappedX && r.y === newY);
+            if (onRelic) {
+                setRelics(prev => prev.filter(r => !(r.x === wrappedX && r.y === newY)));
+                setCollectedRelics(prev => prev + 1);
+            }
+
+            // Viewport'u takip ettir
+            const newViewportX = Math.max(0, Math.min(wrappedX - Math.floor(viewWidth / 2), width - viewWidth));
+            const newViewportY = Math.max(0, Math.min(newY - Math.floor(viewHeight / 2), height - viewHeight));
+            setViewportX(newViewportX);
+            setViewportY(newViewportY);
         };
+
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [width, height]);
+    }, [playerPos, tiles, width, height, relics]);
+
 
     const [panelOpen, setPanelOpen] = useState(true);
 
