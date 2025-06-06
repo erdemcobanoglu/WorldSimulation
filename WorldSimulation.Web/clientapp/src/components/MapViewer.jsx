@@ -83,23 +83,37 @@ const MapViewer = () => {
     const [timeOfDay, setTimeOfDay] = useState(12);
     const [autoAdvance, setAutoAdvance] = useState(true);
     const [forward, setForward] = useState(true);
-    const [startTile, setStartTile] = useState(null);
-    const [endTile, setEndTile] = useState(null);
-    const [path, setPath] = useState([]); 
-    const [playerPos, setPlayerPos] = useState({ x: 0, y: 0 });
-    const [collectedRelics, setCollectedRelics] = useState(0); 
-    const [relics, setRelics] = useState([]);  
-    const isRelicAt = (x, y) => relics.some(r => r.x === x && r.y === y); 
-    const totalRelics = relics.length + collectedRelics;
+    const [playerPos, setPlayerPos] = useState(() => {
+        const saved = localStorage.getItem("playerPos");
+        return saved ? JSON.parse(saved) : { x: 0, y: 0 };
+    });
+    const [collectedRelics, setCollectedRelics] = useState(0);
+    const [relics, setRelics] = useState([]);
 
     const viewWidth = 15;
     const viewHeight = 10;
     const isNight = timeOfDay < 6 || timeOfDay > 18;
 
+    const isRelicAt = (x, y) => relics.some(r => r.x === x && r.y === y);
+    const totalRelics = relics.length + collectedRelics;
+
     const getWeatherSymbol = (weather) => weatherSymbols[weather] || "❔";
     const getOceanSymbol = (event) => oceanEventSymbols[event] || "⚠️";
-
     const isWalkable = (terrain) => ["Land", "Mud", "Ice", "Desert"].includes(terrain);
+
+    // Snapshot sonrası karakterin konumuna göre viewport'u merkezle
+    useEffect(() => {
+        if (width && height) {
+            const newViewportX = Math.max(0, Math.min(playerPos.x - Math.floor(viewWidth / 2), width - viewWidth));
+            const newViewportY = Math.max(0, Math.min(playerPos.y - Math.floor(viewHeight / 2), height - viewHeight));
+            setViewportX(newViewportX);
+            setViewportY(newViewportY);
+        }
+    }, [width, height, playerPos]);
+
+    useEffect(() => {
+        localStorage.setItem("playerPos", JSON.stringify(playerPos));
+    }, [playerPos]);
 
     const findPath = (start, end) => {
         const openSet = [start];
@@ -246,10 +260,12 @@ const MapViewer = () => {
                 setTiles(data.tiles);
                 setWidth(maxX + 1);
                 setHeight(maxY + 1);
-                setViewportX(Math.min(viewportX, maxX + 1 - viewWidth));
-                setViewportY(Math.min(viewportY, maxY + 1 - viewHeight));
                 setRelics(generateRelics(data.tiles));
                 setError(null);
+
+                // 🔁 Oyuncunun konumuna göre ortalama
+                setViewportX(Math.max(0, Math.min(playerPos.x - Math.floor(viewWidth / 2), maxX + 1 - viewWidth)));
+                setViewportY(Math.max(0, Math.min(playerPos.y - Math.floor(viewHeight / 2), maxY + 1 - viewHeight)));
             })
             .catch(err => {
                 console.error("Snapshot hatası:", err);
