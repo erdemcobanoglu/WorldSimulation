@@ -277,14 +277,18 @@ const MapViewer = () => {
 
     useEffect(() => {
         const handleKeyDown = (e) => {
-            let newX = playerPos.x;
-            let newY = playerPos.y;
+            const key = e.key.toLowerCase();
+            let dx = 0;
+            let dy = 0;
 
-            if (e.key === "ArrowUp") newY--;
-            if (e.key === "ArrowDown") newY++;
-            if (e.key === "ArrowLeft") newX--;
-            if (e.key === "ArrowRight") newX++;
+            if (key === "arrowup" || key === "w") dy = -1;
+            else if (key === "arrowdown" || key === "s") dy = 1;
+            else if (key === "arrowleft" || key === "a") dx = -1;
+            else if (key === "arrowright" || key === "d") dx = 1;
+            else return;
 
+            const newX = playerPos.x + dx;
+            const newY = playerPos.y + dy;
             const wrappedX = wrapX(newX, width);
             if (newY < 0 || newY >= height) return;
 
@@ -305,7 +309,6 @@ const MapViewer = () => {
                 setCollectedRelics(prev => prev + 1);
             }
 
-            // Viewport'u takip ettir
             const newViewportX = Math.max(0, Math.min(wrappedX - Math.floor(viewWidth / 2), width - viewWidth));
             const newViewportY = Math.max(0, Math.min(newY - Math.floor(viewHeight / 2), height - viewHeight));
             setViewportX(newViewportX);
